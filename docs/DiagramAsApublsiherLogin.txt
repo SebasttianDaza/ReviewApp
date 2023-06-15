@@ -1,0 +1,17 @@
+title Flow diagram as a publisher login
+
+actor Publisher
+fontawesome f0c2 API Management Azure #1da1f2
+fontawesome f0ac ReviewPublisher
+fontawesome f2f6 Auth
+control Azure Cache for redis
+database Azure Database for MySQL
+
+Publisher->API Management Azure: Publisher into ReviewPublisher\n through Request GET
+API Management Azure->(0)ReviewPublisher: API redirect request.
+ReviewPublisher<<-->>Auth:Authenticate\n request and\n response
+Auth-->>Azure Cache for redis: Check data user\n if already exits
+Auth->Azure Database for MySQL: Check data user
+ReviewPublisher->API Management Azure:Send response user state
+API Management Azure-#00ff00>Publisher:Response is OK, user can create\n, edit and remove resource.
+API Management Azure-#redxPublisher:Response is not OK, close flow

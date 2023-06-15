@@ -1,0 +1,37 @@
+title Flow diagram as a reader
+
+actor Reader
+fontawesome f0c2 API Management Azure #1da1f2
+fontawesome f24e Azure Load Balancer #ffa500
+
+fontawesome f0ac ReviewReader
+control Redis
+database MongoDB
+
+note over ReviewReader, MongoDB: Azure Container App
+note over ReviewReader, MongoDB: Horizontal container Docker
+
+fontawesome f0ac ReviewReader2
+control Redis2
+database MongoDB2
+
+note over ReviewReader2, MongoDB2: Azure Container App
+note over ReviewReader2, MongoDB2: Horizontal container Docker
+
+
+Reader->API Management Azure: GET
+
+API Management Azure->Azure Load Balancer: Send request
+Azure Load Balancer<->ReviewReader:Send request\n and get res
+
+ReviewReader<->Redis: Get content, first step
+ReviewReader<->MongoDB: Get content, second step
+
+Azure Load Balancer<->ReviewReader2: Send request and get response
+
+ReviewReader2<->Redis2: Get content, first step
+ReviewReader2<->MongoDB2: Get conten, second step
+
+Azure Load Balancer->API Management Azure: Return response
+
+API Management Azure->Reader: GET RES
