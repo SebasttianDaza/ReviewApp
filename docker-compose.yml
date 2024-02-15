@@ -1,0 +1,25 @@
+version: '3.7'
+services:
+  review_app_redis:
+    container_name: review_app_redis
+    image: 'redis:7.2.4-alpine'
+    ports:
+      - '10001:6379'
+    networks:
+      - review_app
+  review_app_db:
+    container_name: review_app_db
+    image: 'mysql'
+  review_app_auth_publisher_py:
+    container_name: review_app
+    build:
+      context: .
+      dockerfile: Dockerfile-python
+    volumes:
+      - "./:/var/www/html/ReviewApp"
+    ports:
+      - "9090:8080"
+networks:
+  review_app:
+    driver: bridge
+

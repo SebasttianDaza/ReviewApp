@@ -1,0 +1,32 @@
+title Flow diagram Get, Create, Edit and Remove reviews
+
+actor Publisher
+fontawesome f0c2 API Management Azure #1da1f2
+fontawesome f0ac ReviewPublisher
+control Azure Cache for redis
+database Azure Database for MySQL
+
+Publisher-#00ff00>>API Management Azure:Create review\n GET
+Publisher-#00ff00>>API Management Azure: Edit review\n POST
+Publisher-#00ff00>>API Management Azure: Delete review\n DELETE
+note over Publisher: User already\n authenticated
+API Management Azure<<->>ReviewPublisher:Send request and\n get response
+
+box over ReviewPublisher, Azure Database for MySQL: Get review
+
+ReviewPublisher<->Azure Cache for redis:Get review is\n already there\n and return it
+ReviewPublisher<->Azure Database for MySQL:Get review wasn't in Azure Cache for redis and return it
+
+box over ReviewPublisher, Azure Database for MySQL: Create review
+ReviewPublisher<->Azure Database for MySQL: Add review into database
+
+
+box over ReviewPublisher, Azure Database for MySQL: Edit review
+ReviewPublisher<->Azure Database for MySQL: Update review, save it in cache and return it
+ReviewPublisher->Azure Cache for redis: Update review updated in database
+
+box over ReviewPublisher, Azure Database for MySQL: Remove review
+ReviewPublisher<->Azure Database for MySQL: Remove review
+ReviewPublisher->Azure Cache for redis: Remove review in cache
+
+Publisher<#00ff00-API Management Azure:Send response

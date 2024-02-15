@@ -1,0 +1,21 @@
+FROM python:3.11.0
+
+# The enviroment variable ensures that the python output is set straight
+# to the terminal with out buffering it first
+ENV PYTHONUNBUFFERED 1
+
+COPY . /var/www/html/ReviewApp
+
+WORKDIR /var/www/html/ReviewApp
+
+RUN ls .
+
+RUN pip install --upgrade pip
+
+RUN pip install -r ./ReviewApp/requirements.txt
+
+VOLUME /var/www/html/ReviewApp
+
+EXPOSE 8080
+
+CMD python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000
