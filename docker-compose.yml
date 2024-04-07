@@ -9,9 +9,9 @@ services:
       - review_app
   review_app_db:
     container_name: review_app_db
-    image: 'mysql:8.0.0'
+    image: 'mysql:8.0.11'
     volumes:
-      - 'mysql_data:/var/lib/mysql'
+      - 'mysql_data_review:/var/lib/mysql'
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: review
@@ -30,8 +30,12 @@ services:
       - "./:/var/www/html/ReviewApp"
     ports:
       - "9090:8000"
+    networks:
+      - review_app
+    depends_on:
+      - review_app_db
 networks:
   review_app:
     driver: bridge
 volumes:
-  mysql_data:
+  mysql_data_review:
