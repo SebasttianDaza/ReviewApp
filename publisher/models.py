@@ -1,5 +1,4 @@
 from django.db import models
-from pyexpat import model
 
 
 class Author(models.Model):
@@ -15,7 +14,6 @@ class Images(models.Model):
     date_updated = models.DateTimeField(auto_now=True)
     author = models.ManyToManyField(
         Author,
-        on_delete=models.RESTRICT,
         null=False,
         db_table="author_images"
     )
@@ -26,6 +24,11 @@ class Videos(models.Model):
     description = models.TextField()
     source = models.CharField(max_length=10, null=False, choices={"YT": "YouTube"})
     credit = models.CharField(max_length=15, null=False)
+    author = models.ManyToManyField(
+        Author,
+        null=False,
+        db_table="author_video"
+    )
     date_created = models.DateTimeField(
         auto_now_add=True,
         null=False,
@@ -36,11 +39,39 @@ class Videos(models.Model):
         null=False,
         db_comment="Date and time when the video was updated"
     )
-    author = models.ManyToManyField(
-        Author,
+
+
+class Lens(models.Model):
+    modelName = models.CharField(max_length=100, null=False, unique=True)
+    versionName = models.CharField(max_length=100, null=False)
+    description = models.TextField(null=False)
+    maxResolution = models.IntegerField(null=False)
+    sensorSize = models.IntegerField(null=False)
+    effectivePixels = models.IntegerField(null=False)
+    image = models.ForeignKey(
+        Images,
         on_delete=models.RESTRICT,
         null=False,
-        db_table="author_video"
+    )
+    video = models.ForeignKey(
+        Videos,
+        on_delete=models.RESTRICT,
+        null=True
+    )
+    author = models.ManyToManyField(
+        Author,
+        null=False,
+        db_table="author_lens"
+    )
+    date_created = models.DateTimeField(
+        auto_now_add=True,
+        null=False,
+        db_comment="Date and time when the len was created"
+    )
+    date_updated = models.DateTimeField(
+        auto_now=True,
+        null=False,
+        db_comment="Date and time when the len was updated"
     )
 
 
@@ -58,6 +89,7 @@ class Cameras(models.Model):
         Images,
         on_delete=models.RESTRICT,
         null=True,
+        related_name="%(app_label)s_%(class)s_related"
     )
     # One to many
     video = models.ForeignKey(
@@ -68,7 +100,6 @@ class Cameras(models.Model):
     # Many to many
     author = models.ManyToManyField(
         Author,
-        on_delete=models.RESTRICT,
         null=False,
         db_table="cameras_authors"
     )
@@ -103,7 +134,6 @@ class Review(models.Model):
     )
     author = models.ManyToManyField(
         Author,
-        on_delete=models.RESTRICT,
         null=False,
         db_table="author_reviews"
     )
@@ -116,6 +146,12 @@ class Review(models.Model):
     # Many to one
     videos = models.ForeignKey(
         Videos,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    # Many to one
+    lens = models.ForeignKey(
+        Lens,
         on_delete=models.SET_NULL,
         null=True
     )
