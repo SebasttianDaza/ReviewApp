@@ -1,30 +1,31 @@
 from django.db import models
-
-
-class Author(models.Model):
-    name = models.CharField(max_length=100, null=False)
-    username = models.CharField(max_length=50, null=False, unique=True)
-    id_auth = models.CharField(max_length=100, null=False, unique=True)
+from django.contrib.auth.models import User
 
 
 class Image(models.Model):
+    def __str__(self):
+        return self.title
+
     title = models.CharField(max_length=100, null=False, unique=True)
     description = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
     author = models.ManyToManyField(
-        Author,
+        User,
         db_table="publishers_images_authors"
     )
 
 
 class Video(models.Model):
+    def __str__(self):
+        return self.title
+
     title = models.CharField(max_length=100, null=False, unique=True)
     description = models.TextField()
     source = models.CharField(max_length=10, null=False, choices={"YT": "YouTube"})
     credit = models.CharField(max_length=15, null=False)
     author = models.ManyToManyField(
-        Author,
+        User,
         db_table="publishers_videos_authors"
     )
     date_created = models.DateTimeField(
@@ -40,6 +41,9 @@ class Video(models.Model):
 
 
 class Len(models.Model):
+    def __str__(self):
+        return self.modelName
+
     modelName = models.CharField(max_length=100, null=False, unique=True)
     versionName = models.CharField(max_length=100, null=False)
     description = models.TextField(null=False)
@@ -57,7 +61,7 @@ class Len(models.Model):
         null=True
     )
     author = models.ManyToManyField(
-        Author,
+        User,
         db_table="publishers_lens_authors"
     )
     date_created = models.DateTimeField(
@@ -73,6 +77,9 @@ class Len(models.Model):
 
 
 class Camera(models.Model):
+    def __str__(self):
+        return self.model_name
+
     model_name = models.CharField(max_length=100, null=False, unique=True)
     version = models.CharField(max_length=100, null=False)
     description = models.TextField(max_length=300, null=False)
@@ -96,7 +103,7 @@ class Camera(models.Model):
     )
     # Many to many
     author = models.ManyToManyField(
-        Author,
+        User,
         db_table="publishers_cameras_authors"
     )
 
@@ -115,11 +122,14 @@ class Camera(models.Model):
 
 # Create your models here.
 class Review(models.Model):
+    def __str__(self):
+        return self.title
+
     title = models.CharField(max_length=100, null=False)
     subtitle = models.CharField(max_length=300, null=False)
     body = models.TextField(null=False)
     author = models.ManyToManyField(
-        Author,
+        User,
         db_table="publishers_reviews_authors"
     )
     # Many to one
