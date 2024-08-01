@@ -11,10 +11,15 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import environ, os
+
+env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Take environment variables from .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -27,6 +32,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['0.0.0.0']
 
+#AUTHENTICATION_BACKENDS = ["ReviewApp.auth.backends.LoginBackend"]
 
 # Application definition
 
@@ -39,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'requests',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'ReviewApp.auth.middleware.auth_twitter_middleware'
 ]
 
 ROOT_URLCONF = 'ReviewApp.urls'
