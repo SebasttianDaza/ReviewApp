@@ -1,4 +1,4 @@
-import sys, requests, time, logging
+import requests, time, logging
 
 from django.core.signing import BadSignature
 
