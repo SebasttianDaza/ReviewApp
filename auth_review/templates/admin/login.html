@@ -44,8 +44,12 @@
         {% endif %}
         <div class="submit-row">
             <input type="submit" value="{% translate 'Log in' %}">
-            <input type="submit" value="{% translate 'Log in Twitter' %}">
+            <input type="hidden" name="token_twitter" value="{{ request.get_signed_cookie }}">
+            <input
+                type="submit"
+                value="{% translate 'Log in Twitter' %}"
+            >
         </div>
     </form>
-</div>
+</div>,
 {% endblock %}
