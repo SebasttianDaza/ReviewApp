@@ -1,6 +1,11 @@
 {% extends "admin/login.html" %}
 {% load i18n static %}
 
+{% block dark-mode-vars %}
+  {{ block.super }}
+  <script src="{% static "js/login.js" %}" defer></script>
+{% endblock %}
+
 {% block content %}
     {% if form.errors and not form.non_field_errors %}
         <p class="errornote">
@@ -44,11 +49,13 @@
         {% endif %}
         <div class="submit-row">
             <input type="submit" value="{% translate 'Log in' %}">
-            <input type="hidden" name="token_twitter" value="{{ auth_token_twitter }}">
-            <input
-                type="submit"
-                value="{% translate 'Log in Twitter' %}"
-            >
+            {% if sign_in_twitter|length > 1 %}
+                <input type="hidden" name="token_twitter" value="{{ sign_in_twitter }}">
+                <input
+                    type="submit"
+                    value="{% translate 'Log in Twitter' %}"
+                >
+            {% endif %}
         </div>
     </form>
 </div>

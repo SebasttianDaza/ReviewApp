@@ -6,31 +6,9 @@ from ReviewApp.settings import env
 from urllib.parse import quote_plus
 
 
-def get_signature_twitter(time_signature):
-    from hashlib import sha1
-    import hmac
-    import base64
-
-    query = [
-        f'oauth_callback={quote_plus(env("OAUTH_CALLBACK_URL_TWITTER"))}',
-        f'oauth_consumer_key={env("API_KEY_TWITTER")}',
-        'oauth_nonce=ea9ec8429b68d6b77cd5600adbbb0456',
-        'oauth_signature_method=HMAC-SHA1',
-        f'oauth_timestamp={time_signature}',
-        f'oauth_token={env("OAUTH_TOKEN_TWITTER")}',
-        'oauth_version=1.0'
-    ]
-
-    signature_base = f"POST&{quote_plus(env('API_TWITTER'))}&{quote_plus('&'.join(query))}"
-    key = f"{env('API_SECRET_TWITTER')}&{env('OAUTH_TOKEN_SECRET_TWITTER')}"
-
-    hashed = hmac.new(key.encode("utf-8"), signature_base.encode("utf-8"), sha1)
-
-    return quote_plus(base64.urlsafe_b64encode(hashed.digest()).decode("utf-8"))
-
-
 def auth_twitter_middleware(get_response):
     def middleware(request):
+        from auth_review.http.request import get_signature_twitter
         response = get_response(request)
 
         try:
@@ -45,30 +23,29 @@ def auth_twitter_middleware(get_response):
 
         if (
             request.user.is_authenticated or
-            "/admin/login" not in request.path
+            request.path not in ["/admin/login/", "/redirect"]
         ):
             return response
 
-        time_signature = round(time.time())
         logger = logging.getLogger("review_app.middleware")
-
         try:
+            time_signature = round(time.time())
+            url = f"{env('API_TWITTER')}/oauth/request_token"
             auth = [
-                f'OAuth oauth_callback="{quote_plus(env("OAUTH_CALLBACK_URL_TWITTER"))}"',
-                f'oauth_consumer_key="{env("API_KEY_TWITTER")}"',
-                'oauth_nonce="ea9ec8429b68d6b77cd5600adbbb0456"',
-                f'oauth_signature="{get_signature_twitter(time_signature)}"',
-                'oauth_signature_method="HMAC-SHA1"',
-                f'oauth_timestamp="{time_signature}"',
-                f'oauth_token="{env("OAUTH_TOKEN_TWITTER")}"',
-                'oauth_version="1.0"'
+                f'oauth_callback={quote_plus(env("OAUTH_CALLBACK_URL_TWITTER"))}',
+                f'oauth_consumer_key={env("API_KEY_TWITTER")}',
+                'oauth_nonce=ea9ec8429b68d6b77cd5600adbbb0456',
+                'oauth_signature_method=HMAC-SHA1',
+                f'oauth_timestamp={time_signature}',
+                f'oauth_token={env("OAUTH_TOKEN_TWITTER")}',
+                'oauth_version=1.0'
             ]
-
+            auth.insert(3, f'oauth_signature="{get_signature_twitter(url, auth)}"')
             headers = {
-                "Authorization": ", ".join(auth)
+                "Authorization": "{0} {1}".format("OAuth", ", ".join(auth))
             }
 
-            res = requests.post(f"{env('API_TWITTER')}", headers=headers)
+            res = requests.post(url, headers=headers)
             if res.status_code == 200:
                 token = res.text
                 response.set_signed_cookie(
@@ -82,10 +59,10 @@ def auth_twitter_middleware(get_response):
             else:
                 raise requests.exceptions.RequestException
         except (
-            requests.exceptions.RequestException or
-            requests.exceptions.ConnectionError or
-            requests.exceptions.Timeout or
-            requests.exceptions.TooManyRedirects
+                requests.exceptions.RequestException or
+                requests.exceptions.ConnectionError or
+                requests.exceptions.Timeout or
+                requests.exceptions.TooManyRedirects
         ):
             logger.warn(
                 "Exception raised while requesting twitter authorization.",
