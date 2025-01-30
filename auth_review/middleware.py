@@ -1,3 +1,5 @@
+import sys
+
 import requests, time, logging
 
 from django.core.signing import BadSignature
@@ -6,7 +8,7 @@ from ReviewApp.settings import env
 from urllib.parse import quote_plus
 
 
-def auth_twitter_middleware(get_response):
+def AuthTwitterMiddleware(get_response):
     def middleware(request):
         from auth_review.http.request import get_signature_twitter
         response = get_response(request)
@@ -23,7 +25,7 @@ def auth_twitter_middleware(get_response):
 
         if (
             request.user.is_authenticated or
-            request.path not in ["/admin/login/", "/redirect"]
+            request.path not in ["/admin/login/", "/redirect", "/admin/auth/user/add/"]
         ):
             return response
 

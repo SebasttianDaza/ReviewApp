@@ -1,8 +1,8 @@
-import sys, requests
+import requests
 
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.signing import BadSignature
-from django.http import HttpRequest, HttpResponseRedirect, HttpResponse
+from django.http import HttpRequest, HttpResponseRedirect, HttpResponse, QueryDict
 
 from ReviewApp.settings import env
 from auth_review.forms import AuthenticationForm
@@ -59,7 +59,11 @@ def oauth_twitter_login(request: HttpRequest):
         res = requests.post(f"{url}?oauth_verifier={oauth_verifier}", headers=headers)
 
         if res.status_code == 200:
+            params = QueryDict(res.text)
+            
+
             return HttpResponse(res.text)
 
-        return HttpResponse(res.text)
+        return HttpResponseRedirect("")
+
     return HttpResponseRedirect("")
