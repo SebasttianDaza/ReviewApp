@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from auth_review.models import AuthUser as User
 
 
 class Image(models.Model):
