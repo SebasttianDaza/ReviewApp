@@ -1,17 +1,12 @@
-import sys
-
-import requests, time, logging
-
 from django.core.signing import BadSignature
-
 from ReviewApp.settings import env
+import requests, time, logging
 from urllib.parse import quote_plus
 
-
-def AuthTwitterMiddleware(get_response):
-    def middleware(request):
+def oauth_twitter_token(view_func):
+    def wrapper(request, *args, **kwargs):
         from auth_review.http.request import get_signature_twitter
-        response = get_response(request)
+        response = view_func(request, *args, **kwargs)
 
         try:
             cookie_token = request.get_signed_cookie(
@@ -23,13 +18,8 @@ def AuthTwitterMiddleware(get_response):
         except KeyError or BadSignature:
             pass
 
-        if (
-            request.user.is_authenticated or
-            request.path not in ["/admin/login/", "/redirect", "/admin/auth/user/add/"]
-        ):
-            return response
-
         logger = logging.getLogger("review_app.middleware")
+
         try:
             time_signature = round(time.time())
             url = f"{env('API_TWITTER')}/oauth/request_token"
@@ -74,4 +64,4 @@ def AuthTwitterMiddleware(get_response):
 
         return response
 
-    return middleware
+    return wrapper

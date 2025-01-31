@@ -14,8 +14,8 @@ def submit_row_network(context):
 
     return ctx
 
-@register.tag(name="submit_row_network")
+@register.tag(name="submit_row_social")
 def submit_row_tag(parser, token):
     return InclusionAdminNode(
-        parser, token, func=submit_row_network, template_name="submit_line_network.html"
+        parser, token, func=submit_row_network, template_name="submit_line_social.html"
     )

@@ -5,13 +5,16 @@ from django.core.signing import BadSignature
 from django.http import HttpRequest, HttpResponseRedirect, HttpResponse, QueryDict
 
 from ReviewApp.settings import env
+from auth_review.decorators import oauth_twitter_token
 from auth_review.forms import AuthenticationForm
+from django.utils.decorators import method_decorator
 
 
 class LoginView(DjangoLoginView):
     form_class = AuthenticationForm
     template_name = "admin/login.html"
 
+    @method_decorator(oauth_twitter_token)
     def get(self, request, *args, **kwargs):
         """Handle GET requests: instantiate a blank version of the form."""
 
@@ -30,7 +33,7 @@ class LoginView(DjangoLoginView):
             self.get_context_data(**kwargs),
         )
 
-
+@oauth_twitter_token
 def oauth_twitter_login(request: HttpRequest):
     params = request.GET
     if params.get(key="oauth_token") and params.get(key="oauth_verifier"):
