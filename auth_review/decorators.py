@@ -49,15 +49,15 @@ def oauth_twitter_token(view_func):
                     samesite="Strict"
                 )
             else:
-                raise requests.exceptions.RequestException
+                raise requests.exceptions.RequestException(res.text)
         except (
                 requests.exceptions.RequestException or
                 requests.exceptions.ConnectionError or
                 requests.exceptions.Timeout or
                 requests.exceptions.TooManyRedirects
-        ):
+        ) as e:
             logger.warn(
-                "Exception raised while requesting twitter authorization.",
+                f'Exception raised while requesting twitter authorization. {e}',
                 exc_info=True
             )
             pass

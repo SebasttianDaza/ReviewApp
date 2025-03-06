@@ -49,7 +49,7 @@
         {% endif %}
         <div class="submit-row">
             <input type="submit" value="{% translate 'Log in' %}">
-            {% if sign_in_twitter|length > 1 %}
+            {% if sign_in_twitter is not None  %}
                 <input type="hidden" name="token_twitter" value="{{ sign_in_twitter }}">
                 <input
                     type="submit"
