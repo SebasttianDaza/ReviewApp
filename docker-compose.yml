@@ -1,4 +1,3 @@
-version: '3.7'
 services:
   review_app_redis:
     container_name: review_app_redis
@@ -10,6 +9,7 @@ services:
   review_app_db:
     container_name: review_app_db
     image: 'mysql:8.0.11'
+    restart: always
     volumes:
       - 'mysql_data_review:/var/lib/mysql'
     environment:
