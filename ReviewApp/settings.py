@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-)8s^sl4=8rhjlr1bowftiv)6nrv%pcb+a=yf0np4+_u3ugshhx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0']
+ALLOWED_HOSTS = ['0.0.0.0', 'review-app.com']
 AUTH_USER_MODEL = "auth_review.AuthUser"
 
 # Application definition
