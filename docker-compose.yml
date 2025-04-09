@@ -34,6 +34,16 @@ services:
       - review_app
     depends_on:
       - review_app_db
+  review_app_nginx:
+    container_name: review_app_server
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - review_app_auth_publisher_py
+    network_mode: host
 networks:
   review_app:
     driver: bridge
