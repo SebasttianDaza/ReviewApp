@@ -1,9 +1,14 @@
 {% extends "admin/login.html" %}
 {% load i18n static %}
 
+{% block blockbots %}
+    <meta name="robots" content="NONE,NOARCHIVE">
+{% endblock %}
+
 {% block dark-mode-vars %}
-  {{ block.super }}
-  <script src="{% static "js/login.js" %}" defer></script>
+    {{ block.super }}
+    <script src="{% static "js/login.js" %}" defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 {% endblock %}
 
 {% block content %}
@@ -56,6 +61,13 @@
                     value="{% translate 'Log in Twitter' %}"
                 >
             {% endif %}
+            <div id="g_id_onload"
+                 data-client_id="{{ api_client_id_google }}"
+                 data-ux_mode="redirect"
+                 data-login_uri="{{ site_root }}/auth-google"
+            >
+            </div>
+            <div class="g_id_signin" data-type="standard"></div>
         </div>
     </form>
 </div>
