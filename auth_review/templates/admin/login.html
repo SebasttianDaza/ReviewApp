@@ -5,6 +5,13 @@
     <meta name="robots" content="NONE,NOARCHIVE">
 {% endblock %}
 
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static "css/login.css" %}">
+{% endblock %}
+
+
+
 {% block dark-mode-vars %}
     {{ block.super }}
     <script src="{% static "js/login.js" %}" defer></script>
