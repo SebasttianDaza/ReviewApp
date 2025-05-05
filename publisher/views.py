@@ -6,3 +6,9 @@ from django.http import HttpResponse
 
 def index(request: WSGIRequest) -> HttpResponse:
     return HttpResponse("Hello, world. You're at the Review Index page.")
+
+def terms_of_service():
+    return HttpResponse()
+
+def privacy_police():
+    return HttpResponse()

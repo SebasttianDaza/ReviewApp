@@ -1,12 +1,11 @@
-import sys
-
 import requests, logging
 from django.contrib.auth import authenticate, login
 
 from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.signing import BadSignature
-from django.http import HttpRequest, HttpResponse, QueryDict, HttpResponseBadRequest
+from django.http import HttpRequest, QueryDict, HttpResponseBadRequest
 from django.shortcuts import redirect
+from django.views.decorators.http import require_http_methods
 
 from ReviewApp.settings import env
 from auth_review.decorators import oauth_twitter_token, oauth_twitter_access_token
@@ -102,49 +101,52 @@ def oauth_twitter_login(request: HttpRequest, *args):
 
 
 
-def terms_of_service():
-    return HttpResponse()
-
-def privacy_police():
-    return HttpResponse()
-
 @csrf_exempt
-def auth_google(request: HttpRequest, *args):
+@require_http_methods(["HEAD", "POST"])
+def oauth_google_login(request: HttpRequest, *args):
     payload = request.POST
+    if not payload:
+        return  HttpResponseBadRequest()
 
-    if payload:
-        csrf_token_cookie = request.COOKIES.get("g_csrf_token")
-        csrf_token_body = payload.get("g_csrf_token")
-        if not csrf_token_cookie or  not csrf_token_body or csrf_token_cookie != csrf_token_body:
-            return HttpResponseBadRequest()
+    csrf_token_cookie = request.COOKIES.get("g_csrf_token")
+    csrf_token_body = payload.get("g_csrf_token")
+    if not csrf_token_cookie or not csrf_token_body or csrf_token_cookie != csrf_token_body:
+        logger.warn(
+            f"Exception raised while requesting google verify csrf token"
+        )
+        return HttpResponseBadRequest()
 
-        try:
-            from google.oauth2 import id_token
-            from google.auth.transport import requests
+    try:
+        from google.oauth2 import id_token
+        from google.auth.transport import requests
 
-            id_info = id_token.verify_oauth2_token(
-                payload.get("credential"),
-                requests.Request(),
-                payload.get("clientId")
+        id_info = id_token.verify_oauth2_token(
+            payload.get("credential"),
+            requests.Request(),
+            payload.get("clientId")
+        )
+        userid = id_info['sub']
+        username = id_info['name'].lower().replace(" ", "_")
+
+        if not AuthUser.objects.filter(username=username).exists():
+            AuthUser.objects.create_user(
+                username=username,
+                first_name=id_info['given_name'],
+                last_name=id_info['family_name'],
+                email=id_info['email'],
+                password=userid,
+                is_staff=True,
             )
-            userid = id_info['sub']
-            username = id_info['name'].lower().replace(" ", "_")
 
-            if not AuthUser.objects.filter(username=username).exists():
-                AuthUser.objects.create_user(
-                    username=username,
-                    first_name=id_info['given_name'],
-                    last_name=id_info['family_name'],
-                    email=id_info['email'],
-                    password=userid,
-                    is_staff=True,
-                )
+        user = authenticate(username=username, password=userid)
+        if user is not None:
+            login(request, user)
+            return redirect("/admin/")
 
-            user = authenticate(username=username, password=userid)
-            if user is not None:
-                login(request, user)
-                return redirect("/admin/")
-            else:
-                return redirect("/admin/login")
-        except ValueError:
-            return HttpResponseBadRequest()
+        return redirect("/admin/login")
+    except ValueError:
+        logger.warn(
+            f"Exception raised while requesting google verify google id token"
+        )
+        return HttpResponseBadRequest()
+
