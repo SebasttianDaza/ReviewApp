@@ -21,3 +21,8 @@ The sqlmigrate command doesn’t actually run the migration on your database - i
 ```bash
 $ python manage.py sqlmigrate publisher 0001
 ```
+
+```bash
+$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./build/reviewapp.key -out ./build/reviewapp.crt -config ./build/reviewapp.conf -passin pass:reviewapppy
+
+```
