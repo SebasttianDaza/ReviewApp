@@ -9,6 +9,7 @@ logger = logging.getLogger("review_app.middleware")
 def oauth_twitter_token(view_func):
     def wrapper(request, *args, **kwargs):
         from auth_review.http.request import get_signature_twitter
+        from ReviewApp.helpers import site
         response = view_func(request, *args, **kwargs)
 
         try:
@@ -25,7 +26,7 @@ def oauth_twitter_token(view_func):
             time_signature = round(time.time())
             url = f"{env('API_TWITTER')}/oauth/request_token"
             auth = [
-                f'oauth_callback={quote_plus(env("OAUTH_CALLBACK_URL_TWITTER"))}',
+                f'oauth_callback={quote_plus(site(request) + "/auth-twitter")}',
                 f'oauth_consumer_key={env("API_KEY_TWITTER")}',
                 'oauth_nonce=ea9ec8429b68d6b77cd5600adbbb0456',
                 'oauth_signature_method=HMAC-SHA1',

@@ -32,6 +32,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['0.0.0.0', env('HOST_DOMAIN'), env('HOST_LOCALHOST'), env('HOST_REVERSE_PROXY')]
 AUTH_USER_MODEL = "auth_review.AuthUser"
+### Just on local
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
 
