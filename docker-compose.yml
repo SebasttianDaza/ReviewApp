@@ -2,10 +2,10 @@ services:
   review_app_redis:
     container_name: review_app_redis
     image: 'redis:7.2.4-alpine'
+    restart: always
     ports:
-      - '10001:6379'
-    networks:
-      - review_app
+      - "${REDIS_CACHE_PORT}:${REDIS_CACHE_PORT}"
+    command: "redis-server --save 20 1 --loglevel warning --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
   review_app_db:
     container_name: review_app_db
     image: 'mysql:8.0.11'
@@ -34,6 +34,7 @@ services:
       - review_app
     depends_on:
       - review_app_db
+      - review_app_redis
   review_app_nginx:
     container_name: review_app_server
     image: nginx:latest
