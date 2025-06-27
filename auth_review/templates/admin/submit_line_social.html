@@ -6,6 +6,13 @@
 {% if show_save_and_add_another %}<input type="submit" value="{% translate 'Save and add another' %}" name="_addanother">{% endif %}
 {% if show_save_and_continue %}<input type="submit" value="{% if can_change %}{% translate 'Save and continue editing' %}{% else %}{% translate 'Save and view' %}{% endif %}" name="_continue">{% endif %}
 {% if login_twitter %}<input type="submit" value="{% translate 'Register twitter' %}" name="_savetwitter">{% endif %}
+<div id="g_id_onload"
+     data-client_id="{{ api_client_id_google }}"
+     data-ux_mode="redirect"
+     data-login_uri="{{ site_root }}/admin/auth-google"
+>
+</div>
+<div class="g_id_signin" data-type="standard"></div>
 {% if show_close %}
     {% url opts|admin_urlname:'changelist' as changelist_url %}
     <a href="{% add_preserved_filters changelist_url %}" class="closelink">{% translate 'Close' %}</a>

@@ -5,6 +5,7 @@ from django.contrib.auth.views import LoginView as DjangoLoginView
 from django.core.signing import BadSignature
 from django.http import HttpRequest, QueryDict, HttpResponseBadRequest
 from django.shortcuts import redirect
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods
 
 from ReviewApp.settings import env
@@ -102,9 +103,11 @@ def oauth_twitter_login(request: HttpRequest, *args):
 
 
 @csrf_exempt
-@require_http_methods(["HEAD", "POST"])
+@require_http_methods(["HEAD", "GET", "POST"])
+@never_cache
 def oauth_google_login(request: HttpRequest, *args):
     payload = request.POST
+
     if not payload:
         return  HttpResponseBadRequest()
 
