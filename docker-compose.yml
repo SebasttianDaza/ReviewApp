@@ -2,14 +2,12 @@ services:
   review_app_redis:
     container_name: review_app_redis
     image: 'redis:7.2.4-alpine'
-    restart: always
     ports:
       - "${REDIS_CACHE_PORT}:${REDIS_CACHE_PORT}"
     command: "redis-server --save 20 1 --loglevel warning --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
   review_app_db:
     container_name: review_app_db
     image: 'mysql:8.0.11'
-    restart: always
     volumes:
       - 'mysql_data_review:/var/lib/mysql'
     environment:
