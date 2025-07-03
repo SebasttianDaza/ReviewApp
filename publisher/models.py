@@ -10,6 +10,7 @@ class Image(models.Model):
     description = models.TextField()
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
+    image = models.ImageField(upload_to="uploads/%Y/%m/%d/", default="uploads/image/default.png", blank=True, null=True)
     author = models.ManyToManyField(
         User,
         db_table="publishers_images_authors"
@@ -22,6 +23,7 @@ class Video(models.Model):
 
     title = models.CharField(max_length=100, null=False, unique=True)
     description = models.TextField()
+    source_id = models.CharField(max_length=100, null=True, unique=True)
     source = models.CharField(max_length=10, null=False, choices={"YT": "YouTube"})
     credit = models.CharField(max_length=15, null=False)
     author = models.ManyToManyField(

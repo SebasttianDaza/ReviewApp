@@ -45,8 +45,22 @@ services:
       - "443:443"
     depends_on:
       - review_app_auth_publisher_py
+      - review_app_reader
     networks:
       - review_app
+  review_app_reader:
+    container_name: review_reader
+    build:
+      context: ./reader
+      dockerfile: Dockerfile-python
+    volumes:
+      - "./reader/:/var/www/html/ReviewApp/reader"
+    ports:
+      - "9091:8081"
+    networks:
+      - review_app
+    depends_on:
+      - review_app_redis
 networks:
   review_app:
     driver: bridge
