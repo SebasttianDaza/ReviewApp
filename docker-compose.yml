@@ -49,14 +49,15 @@ services:
     networks:
       - review_app
   review_app_reader:
-    container_name: review_reader
     build:
       context: ./reader
       dockerfile: Dockerfile-python
+    deploy:
+      replicas: 3
     volumes:
       - "./reader/:/var/www/html/ReviewApp/reader"
-    ports:
-      - "9091:8081"
+    environment:
+      - PORT=8081
     networks:
       - review_app
     depends_on:
