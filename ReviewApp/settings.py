@@ -30,8 +30,10 @@ SECRET_KEY = 'django-insecure-)8s^sl4=8rhjlr1bowftiv)6nrv%pcb+a=yf0np4+_u3ugshhx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0', 'review-app.com']
+ALLOWED_HOSTS = ['0.0.0.0', env('HOST_DOMAIN'), env('HOST_LOCALHOST'), env('HOST_REVERSE_PROXY')]
 AUTH_USER_MODEL = "auth_review.AuthUser"
+### Just on local
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
 
@@ -71,6 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'ReviewApp.template.context_processors.site'
             ],
         },
     },
@@ -134,3 +137,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f'redis://{env("REDIS_CACHE_USER")}:{env("REDIS_CACHE_PASSWORD")}@{env("REDIS_CACHE_HOST")}:{env("REDIS_CACHE_PORT")}',
+    }
+}

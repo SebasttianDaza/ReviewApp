@@ -5,3 +5,5 @@ django-filter
 mysqlclient
 requests
 django-environ
+google-auth
+redis
