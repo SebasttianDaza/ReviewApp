@@ -26,3 +26,7 @@ $ python manage.py sqlmigrate publisher 0001
 $ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./build/reviewapp.key -out ./build/reviewapp.crt -config ./build/reviewapp.conf -passin pass:reviewapppy
 
 ```
+
+```bash
+$  docker compose up -d --wait --remove-orphans
+```

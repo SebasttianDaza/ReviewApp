@@ -135,6 +135,20 @@ services:
       - ./reader:/reader
     restart: "no"
     entrypoint: [ "bash", "/reader/mongo_setup.sh" ]
+  review_app_azure_function:
+    container_name: review_app_azfuction
+    build:
+      context: ./migration
+      dockerfile: Dockerfile
+    ports:
+      - "7071:80"
+    environment:
+      AzureWebJobsStorage: "UseDevelopmentStorage=false"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet"
+    volumes:
+      - ./migration/:/home/site/wwwroot 
+    depends_on:
+      - review_app_db
 networks:
   review_app:
     driver: bridge
