@@ -48,6 +48,7 @@ services:
       - review_app_reader
     networks:
       - review_app
+      - review_app_reader
   review_app_reader:
     build:
       context: ./reader
@@ -59,11 +60,91 @@ services:
     environment:
       - PORT=8081
     networks:
-      - review_app
+      - review_app_reader
     depends_on:
-      - review_app_redis
+      - review_app_reader_redis
+      - review_app_reader_setup
+  review_app_reader_redis:
+    image: 'redis:7.2.4-alpine'
+    deploy:
+      replicas: 3
+    environment:
+      - PORT=6378
+    command: "redis-server --save 20 1 --loglevel warning --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+    networks:
+      - review_app_reader
+  review_app_reader_db:
+    image: mongo
+    hostname: review_reader_db
+    container_name: review_reader_db
+    volumes:
+      - mongodb_data_reader:/data/db
+      - mongodb_config_reader:/data/configdb
+    ports:
+      - "27017:27017"
+    entrypoint: ["mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_USERNAME: reader
+      MONGO_INITDB_PASSWORD: reader
+    networks:
+      - review_app_reader
+  review_app_reader_db_1:
+    image: mongo
+    hostname: review_reader_db_1
+    container_name: review_reader_db_1
+    volumes:
+      - mongodb_data_reader_1:/data/db
+      - mongodb_config_reader_1:/data/configdb
+    ports:
+      - "27018:27017"
+    entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db_1" ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_USERNAME: reader
+      MONGO_INITDB_PASSWORD: reader
+    networks:
+      - review_app_reader
+  review_app_reader_db_2:
+    image: mongo
+    hostname: review_reader_db_2
+    container_name: review_reader_db_2
+    volumes:
+      - mongodb_data_reader_2:/data/db
+      - mongodb_config_reader_2:/data/configdb
+    ports:
+      - "27019:27017"
+    entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db_2" ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_USERNAME: reader
+      MONGO_INITDB_PASSWORD: reader
+    networks:
+      - review_app_reader
+  review_app_reader_setup:
+    image: mongo
+    container_name: review_reader_db_setup
+    depends_on:
+      - review_app_reader_db
+      - review_app_reader_db_1
+      - review_app_reader_db_2
+    volumes:
+      - ./reader:/reader
+    restart: "no"
+    entrypoint: [ "bash", "/reader/mongo_setup.sh" ]
 networks:
   review_app:
     driver: bridge
+  review_app_reader:
+    driver: bridge
 volumes:
   mysql_data_review:
+  mongodb_data_reader:
+  mongodb_config_reader:
+  mongodb_data_reader_1:
+  mongodb_config_reader_1:
+  mongodb_data_reader_2:
+  mongodb_config_reader_2:
