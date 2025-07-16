@@ -136,23 +136,40 @@ services:
     restart: "no"
     entrypoint: [ "bash", "/reader/mongo_setup.sh" ]
   review_app_azure_function:
-    container_name: review_app_azfuction
+    container_name: review_app_azfunction
     build:
-      context: ./migration
+      context: ./Migration
       dockerfile: Dockerfile
     ports:
       - "7071:80"
     environment:
-      AzureWebJobsStorage: "UseDevelopmentStorage=false"
-      FUNCTIONS_WORKER_RUNTIME: "dotnet"
-    volumes:
-      - ./migration/:/home/site/wwwroot 
+      AzureWebJobsStorage: "${AZURITE_WEB_STORAGE}"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
     depends_on:
       - review_app_db
+      - review_app_azurite
+    networks:
+      - review_app_azfunctions
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  review_app_azurite:
+    container_name: review_app_azurite
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: "azurite --loose --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002"
+    ports:
+      - "10000:10000" # Blob service
+      - "10001:10001" # Queue service
+      - "10002:10002" # Table service
+    volumes:
+      - azurite_data:/data # Persistent storage for Azurite data
+    networks:
+      - review_app_azfunctions
 networks:
   review_app:
     driver: bridge
   review_app_reader:
+    driver: bridge
+  review_app_azfunctions:
     driver: bridge
 volumes:
   mysql_data_review:
@@ -162,3 +179,4 @@ volumes:
   mongodb_config_reader_1:
   mongodb_data_reader_2:
   mongodb_config_reader_2:
+  azurite_data:

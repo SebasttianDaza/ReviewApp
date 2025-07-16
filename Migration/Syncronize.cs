@@ -2,19 +2,19 @@ using System;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 
-namespace migration
+namespace Migration
 {
-    public class synchronize
+    public class Syncronize
     {
         private readonly ILogger _logger;
 
-        public synchronize(ILoggerFactory loggerFactory)
+        public Syncronize(ILoggerFactory loggerFactory)
         {
-            _logger = loggerFactory.CreateLogger<synchronize>();
+            _logger = loggerFactory.CreateLogger<Syncronize>();
         }
 
-        [Function("synchronize")]
-        public void Run([TimerTrigger("0 */5 * * * *")] TimerInfo myTimer)
+        [Function("Syncronize")]
+        public void Run([TimerTrigger("*/5 * * * *")] TimerInfo myTimer)
         {
             _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
             

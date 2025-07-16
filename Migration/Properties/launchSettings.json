@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "migration": {
+    "Migration": {
       "commandName": "Project",
       "commandLineArgs": "--port 7159",
       "launchBrowser": false
