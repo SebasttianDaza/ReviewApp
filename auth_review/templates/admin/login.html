@@ -1,0 +1,81 @@
+{% extends "admin/login.html" %}
+{% load i18n static %}
+
+{% block blockbots %}
+    <meta name="robots" content="NONE,NOARCHIVE">
+{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static "css/login.css" %}">
+{% endblock %}
+
+
+
+{% block dark-mode-vars %}
+    {{ block.super }}
+    <script src="{% static "js/login.js" %}" defer></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+{% endblock %}
+
+{% block content %}
+    {% if form.errors and not form.non_field_errors %}
+        <p class="errornote">
+        {% blocktranslate count counter=form.errors.items|length %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktranslate %}
+        </p>
+    {% endif %}
+
+{% if form.non_field_errors %}
+    {% for error in form.non_field_errors %}
+        <p class="errornote">
+            {{ error }}
+        </p>
+    {% endfor %}
+{% endif %}
+
+<div id="content-main">
+    {% if user.is_authenticated %}
+        <p class="errornote">
+        {% blocktranslate trimmed %}
+            You are authenticated as {{ username }}, but are not authorized to
+            access this page. Would you like to login to a different account?
+        {% endblocktranslate %}
+        </p>
+    {% endif %}
+
+    <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
+        <div class="form-row">
+            {{ form.username.errors }}
+            {{ form.username.label_tag }} {{ form.username }}
+        </div>
+        <div class="form-row">
+            {{ form.password.errors }}
+            {{ form.password.label_tag }} {{ form.password }}
+            <input type="hidden" name="next" value="{{ next }}">
+        </div>
+        {% url 'admin_password_reset' as password_reset_url %}
+        {% if password_reset_url %}
+            <div class="password-reset-link">
+                <a href="{{ password_reset_url }}">{% translate 'Forgotten your password or username?' %}</a>
+            </div>
+        {% endif %}
+        <div class="submit-row">
+            <input type="submit" value="{% translate 'Log in' %}">
+            {% if sign_in_twitter is not None  %}
+                <input type="hidden" name="token_twitter" value="{{ sign_in_twitter }}">
+                <input
+                    type="submit"
+                    value="{% translate 'Log in Twitter' %}"
+                >
+            {% endif %}
+            <div id="g_id_onload"
+                 data-client_id="{{ api_client_id_google }}"
+                 data-ux_mode="redirect"
+                 data-login_uri="{{ site_root }}/admin/auth-google"
+            >
+            </div>
+            <div class="g_id_signin" data-type="standard"></div>
+        </div>
+    </form>
+</div>
+{% endblock %}

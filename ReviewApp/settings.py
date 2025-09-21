@@ -11,10 +11,15 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import environ, os
+
+env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Take environment variables from .env file
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -25,18 +30,24 @@ SECRET_KEY = 'django-insecure-)8s^sl4=8rhjlr1bowftiv)6nrv%pcb+a=yf0np4+_u3ugshhx
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0']
-
+ALLOWED_HOSTS = ['0.0.0.0', env('HOST_DOMAIN'), env('HOST_LOCALHOST'), env('HOST_REVERSE_PROXY')]
+AUTH_USER_MODEL = "auth_review.AuthUser"
+### Just on local
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
 
 INSTALLED_APPS = [
+    'auth_review.apps.AuthConfig',
+    'publisher.apps.PublisherConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'requests',
 ]
 
 MIDDLEWARE = [
@@ -62,6 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'ReviewApp.template.context_processors.site'
             ],
         },
     },
@@ -75,8 +87,12 @@ WSGI_APPLICATION = 'ReviewApp.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': 'review_app_db',
+        'USER': 'review',
+        'NAME': 'review',
+        'PASSWORD': 'review',
+        'TIME_ZONE': 'America/Bogota'
     }
 }
 
@@ -121,3 +137,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f'redis://{env("REDIS_CACHE_USER")}:{env("REDIS_CACHE_PASSWORD")}@{env("REDIS_CACHE_HOST")}:{env("REDIS_CACHE_PORT")}',
+    }
+}

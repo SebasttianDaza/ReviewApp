@@ -1,0 +1,8 @@
+{% extends "admin/change_form.html" %}
+{% load auth_admin_modify %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+{% endblock %}
+{% block submit_buttons_bottom %}{% submit_row_social %}{% endblock %}

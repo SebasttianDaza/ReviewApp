@@ -1,0 +1,4 @@
+.login .submit-row {
+    display: flex;
+    flex-direction: column;
+}

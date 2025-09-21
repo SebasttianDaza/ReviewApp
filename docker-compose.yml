@@ -1,17 +1,15 @@
-version: '3.7'
 services:
   review_app_redis:
     container_name: review_app_redis
     image: 'redis:7.2.4-alpine'
     ports:
-      - '10001:6379'
-    networks:
-      - review_app
+      - "${REDIS_CACHE_PORT}:${REDIS_CACHE_PORT}"
+    command: "redis-server --save 20 1 --loglevel warning --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
   review_app_db:
     container_name: review_app_db
-    image: 'mysql:8.0.0'
+    image: 'mysql:8.0.11'
     volumes:
-      - 'mysql_data:/var/lib/mysql'
+      - 'mysql_data_review:/var/lib/mysql'
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: review
@@ -30,8 +28,155 @@ services:
       - "./:/var/www/html/ReviewApp"
     ports:
       - "9090:8000"
+    networks:
+      - review_app
+    depends_on:
+      - review_app_db
+      - review_app_redis
+  review_app_nginx:
+    container_name: review_app_server
+    image: nginx:latest
+    volumes:
+      - ./build/nginx.conf:/etc/nginx/nginx.conf
+      - ./build/reviewapp.crt:/etc/ssl/certs/reviewapp.crt
+      - ./build/reviewapp.key:/etc/ssl/private/reviewapp.key
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - review_app_auth_publisher_py
+      - review_app_reader
+    networks:
+      - review_app
+      - review_app_reader
+  review_app_reader:
+    build:
+      context: ./reader
+      dockerfile: Dockerfile-python
+    deploy:
+      replicas: 3
+    volumes:
+      - "./reader/:/var/www/html/ReviewApp/reader"
+    environment:
+      - PORT=8081
+    networks:
+      - review_app_reader
+    depends_on:
+      - review_app_reader_redis
+      - review_app_reader_setup
+  review_app_reader_redis:
+    image: 'redis:7.2.4-alpine'
+    deploy:
+      replicas: 3
+    environment:
+      - PORT=6378
+    command: "redis-server --save 20 1 --loglevel warning --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+    networks:
+      - review_app_reader
+  review_app_reader_db:
+    image: mongo
+    hostname: review_reader_db
+    container_name: review_reader_db
+    volumes:
+      - mongodb_data_reader:/data/db
+      - mongodb_config_reader:/data/configdb
+    ports:
+      - "27017:27017"
+    entrypoint: ["mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_USERNAME: reader
+      MONGO_INITDB_PASSWORD: reader
+    networks:
+      - review_app_reader
+  review_app_reader_db_1:
+    image: mongo
+    hostname: review_reader_db_1
+    container_name: review_reader_db_1
+    volumes:
+      - mongodb_data_reader_1:/data/db
+      - mongodb_config_reader_1:/data/configdb
+    ports:
+      - "27018:27017"
+    entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db_1" ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_USERNAME: reader
+      MONGO_INITDB_PASSWORD: reader
+    networks:
+      - review_app_reader
+  review_app_reader_db_2:
+    image: mongo
+    hostname: review_reader_db_2
+    container_name: review_reader_db_2
+    volumes:
+      - mongodb_data_reader_2:/data/db
+      - mongodb_config_reader_2:/data/configdb
+    ports:
+      - "27019:27017"
+    entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db_2" ]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_USERNAME: reader
+      MONGO_INITDB_PASSWORD: reader
+    networks:
+      - review_app_reader
+  review_app_reader_setup:
+    image: mongo
+    container_name: review_reader_db_setup
+    depends_on:
+      - review_app_reader_db
+      - review_app_reader_db_1
+      - review_app_reader_db_2
+    volumes:
+      - ./reader:/reader
+    restart: "no"
+    entrypoint: [ "bash", "/reader/mongo_setup.sh" ]
+  review_app_azure_function:
+    container_name: review_app_azfunction
+    build:
+      context: ./Migration
+      dockerfile: Dockerfile
+    ports:
+      - "7071:80"
+    environment:
+      AzureWebJobsStorage: "${AZURITE_WEB_STORAGE}"
+      FUNCTIONS_WORKER_RUNTIME: "dotnet-isolated"
+    depends_on:
+      - review_app_db
+      - review_app_azurite
+    networks:
+      - review_app_azfunctions
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  review_app_azurite:
+    container_name: review_app_azurite
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: "azurite --loose --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002"
+    ports:
+      - "10000:10000" # Blob service
+      - "10001:10001" # Queue service
+      - "10002:10002" # Table service
+    volumes:
+      - azurite_data:/data # Persistent storage for Azurite data
+    networks:
+      - review_app_azfunctions
 networks:
   review_app:
     driver: bridge
+  review_app_reader:
+    driver: bridge
+  review_app_azfunctions:
+    driver: bridge
 volumes:
-  mysql_data:
+  mysql_data_review:
+  mongodb_data_reader:
+  mongodb_config_reader:
+  mongodb_data_reader_1:
+  mongodb_config_reader_1:
+  mongodb_data_reader_2:
+  mongodb_config_reader_2:
+  azurite_data:
