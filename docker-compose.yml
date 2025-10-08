@@ -143,7 +143,7 @@ services:
       dockerfile: Dockerfile-dev
     # Comment this volume on prod or need to prove with azfunction dotnet
     volumes:
-      - ./Migration:/src/Migration
+      - ./Migration:/home/site/wwwroot
     ports:
       - "7071:80"
     environment:
