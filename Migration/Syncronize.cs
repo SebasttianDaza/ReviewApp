@@ -17,6 +17,7 @@ namespace Migration
         public void Run([TimerTrigger("*/5 * * * *")] TimerInfo myTimer)
         {
             _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
+            var str = Environment.GetEnvironmentVariable("SQLConnectionString");
             
             if (myTimer.ScheduleStatus is not null)
             {

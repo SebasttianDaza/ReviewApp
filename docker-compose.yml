@@ -139,7 +139,11 @@ services:
     container_name: review_app_azfunction
     build:
       context: ./Migration
-      dockerfile: Dockerfile
+      # Update file to Dockerfile on prod or need to prove with azfunction dotnet
+      dockerfile: Dockerfile-dev
+    # Comment this volume on prod or need to prove with azfunction dotnet
+    volumes:
+      - ./Migration:/src/Migration
     ports:
       - "7071:80"
     environment:
@@ -180,3 +184,4 @@ volumes:
   mongodb_data_reader_2:
   mongodb_config_reader_2:
   azurite_data:
+  azurite_function:
