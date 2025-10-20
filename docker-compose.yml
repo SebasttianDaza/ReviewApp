@@ -30,6 +30,9 @@ services:
       - "9090:8000"
     networks:
       - review_app
+      - review_app_azfunctions
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - review_app_db
       - review_app_redis
@@ -159,7 +162,7 @@ services:
   review_app_azurite:
     container_name: review_app_azurite
     image: mcr.microsoft.com/azure-storage/azurite
-    command: "azurite --loose --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002"
+    command: "azurite --loose --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002 --skipApiVersionCheck"
     ports:
       - "10000:10000" # Blob service
       - "10001:10001" # Queue service
