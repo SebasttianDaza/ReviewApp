@@ -25,8 +25,3 @@ class QueueMessageService:
 
     def peek_messages(self, max_messages=100):
         return self.queue_client.peek_messages(max_messages)
-
-
-class QueueMessagePublisher(QueueMessageService):
-    def __init__(self, queue_name="publisher"):
-        super().__init__(queue_name)

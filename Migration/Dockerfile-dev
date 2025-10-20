@@ -1,11 +1,4 @@
-﻿#FROM mcr.microsoft.com/dotnet/sdk:8.0
-
-#COPY . /src/Migration
-#WORKDIR /src/Migration
-#RUN dotnet add package Microsoft.Data.SqlClient
-
-#CMD dotnet watch run --urls=http://0.0.0.0:80 --project /src/Migration
-FROM ubuntu:22.04
+﻿FROM ubuntu:22.04
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
