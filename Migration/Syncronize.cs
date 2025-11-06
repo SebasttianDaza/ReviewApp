@@ -15,7 +15,7 @@ public class Syncronize
     }
 
     [Function(nameof(Syncronize))]
-    public void Run([QueueTrigger("publisher", Connection = "")] QueueMessage message)
+    public void Run([QueueTrigger("publisher", Connection = "AzureWebJobsStorage")] QueueMessage message)
     {
         _logger.LogInformation("C# Queue trigger function processed: {messageText}", message.MessageText);
     }

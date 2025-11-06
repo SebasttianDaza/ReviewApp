@@ -1,4 +1,4 @@
-from azure.storage.queue import QueueClient
+from azure.storage.queue import QueueClient, BinaryBase64EncodePolicy, BinaryBase64DecodePolicy
 from ReviewApp.settings import env
 
 class QueueMessageService:
@@ -10,7 +10,9 @@ class QueueMessageService:
         self.queue_name = queue_name
         self.queue_client = QueueClient.from_connection_string(
             env('AZURITE_WEB_STORAGE'),
-            queue_name=self.queue_name
+            queue_name=self.queue_name,
+            message_encode_policy=BinaryBase64EncodePolicy(),
+            message_decode_policy=BinaryBase64DecodePolicy()
         )
         try:
             self.queue_client.create_queue()

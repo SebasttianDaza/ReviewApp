@@ -87,10 +87,11 @@ services:
       - "27017:27017"
     entrypoint: ["mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db"]
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_USERNAME: reader
-      MONGO_INITDB_PASSWORD: reader
+      MONGO_INITDB_DATABASE: "${MONGO_INIT_DATABASE}"
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INIT_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INIT_ROOT_PASSWORD}"
+      MONGO_INITDB_USERNAME: "${MONGO_INIT_USERNAME}"
+      MONGO_INITDB_PASSWORD: "${MONGO_INIT_PASSWORD}"
     networks:
       - review_app_reader
   review_app_reader_db_1:
@@ -104,10 +105,11 @@ services:
       - "27018:27017"
     entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db_1" ]
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_USERNAME: reader
-      MONGO_INITDB_PASSWORD: reader
+      MONGO_INITDB_DATABASE: "${MONGO_INIT_DATABASE}"
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INIT_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INIT_ROOT_PASSWORD}"
+      MONGO_INITDB_USERNAME: "${MONGO_INIT_USERNAME}"
+      MONGO_INITDB_PASSWORD: "${MONGO_INIT_PASSWORD}"
     networks:
       - review_app_reader
   review_app_reader_db_2:
@@ -121,10 +123,11 @@ services:
       - "27019:27017"
     entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db_2" ]
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_USERNAME: reader
-      MONGO_INITDB_PASSWORD: reader
+      MONGO_INITDB_DATABASE: "${MONGO_INIT_DATABASE}"
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INIT_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INIT_ROOT_PASSWORD}"
+      MONGO_INITDB_USERNAME: "${MONGO_INIT_USERNAME}"
+      MONGO_INITDB_PASSWORD: "${MONGO_INIT_PASSWORD}"
     networks:
       - review_app_reader
   review_app_reader_setup:
@@ -138,6 +141,8 @@ services:
       - ./reader:/reader
     restart: "no"
     entrypoint: [ "bash", "/reader/mongo_setup.sh" ]
+    networks:
+      - review_app_reader
   review_app_azure_function:
     container_name: review_app_azfunction
     build:
