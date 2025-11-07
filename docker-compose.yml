@@ -31,9 +31,10 @@ services:
     networks:
       - review_app
       - review_app_azfunctions
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    #extra_hosts: To connect to azurite without network
+     # - "host.docker.internal:host-gateway"
     depends_on:
+      - review_app_azurite
       - review_app_db
       - review_app_redis
   review_app_nginx:
@@ -49,9 +50,11 @@ services:
     depends_on:
       - review_app_auth_publisher_py
       - review_app_reader
+      - review_app_azurite
     networks:
       - review_app
       - review_app_reader
+      - review_app_azfunctions
   review_app_reader:
     build:
       context: ./reader
@@ -166,6 +169,7 @@ services:
       - "host.docker.internal:host-gateway"
   review_app_azurite:
     container_name: review_app_azurite
+    hostname: review_app_azurite
     image: mcr.microsoft.com/azure-storage/azurite
     command: "azurite --loose --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002 --skipApiVersionCheck"
     ports:

@@ -34,7 +34,6 @@ ALLOWED_HOSTS = ['0.0.0.0', env('HOST_DOMAIN'), env('HOST_LOCALHOST'), env('HOST
 AUTH_USER_MODEL = "auth_review.AuthUser"
 ### Just on local
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -48,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'requests',
+    'storages'
 ]
 
 MIDDLEWARE = [
@@ -142,5 +142,35 @@ CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
         "LOCATION": f'redis://{env("REDIS_CACHE_USER")}:{env("REDIS_CACHE_PASSWORD")}@{env("REDIS_CACHE_HOST")}:{env("REDIS_CACHE_PORT")}',
+    }
+}
+
+#AZURE_SSL = True
+AZURE_ACCOUNT_NAME = env('AZURE_ACCOUNT_NAME')
+AZURE_ACCOUNT_KEY = env('AZURE_ACCOUNT_KEY')
+AZURE_CONNECTION_STRING = None
+AZURE_CONTAINER_STATIC = "static"
+AZURE_CONTAINER_MEDIA = "media"
+AZURE_CUSTOM_DOMAIN =  env('HOST_DOMAIN')
+
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "azure_container": AZURE_CONTAINER_MEDIA,
+            "account_name": AZURE_ACCOUNT_NAME,
+            "account_key": AZURE_ACCOUNT_KEY,
+            "connection_string": AZURE_CONNECTION_STRING,
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "azure_container": AZURE_CONTAINER_STATIC,
+            "account_name": AZURE_ACCOUNT_NAME,
+            "account_key": AZURE_ACCOUNT_KEY,
+            "connection_string": AZURE_CONNECTION_STRING,
+        }
     }
 }
