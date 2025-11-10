@@ -4,6 +4,9 @@
 
 - [Migrations](#make-migrations)
 - [Migrate](#migrate-migrations)
+- [Install Azure Storage Explorer](#install-azure-storage-explorer)
+- [Upload files static storage](#upload-files-statics-to-storage)
+- [Create user admin](#create-user-admin)
 
 
 ## Make migrations
@@ -34,7 +37,23 @@ $  docker compose up -d --wait --remove-orphans
 ## Install Azure storage explorer
 
 ```bash
-sudo apt update
-sudo apt install snapd
-sudo snap install storage-explorer
+$ sudo apt update
+$ sudo apt install snapd
+$ sudo snap install storage-explorer
+```
+
+## Upload files statics to storage
+
+[Docs](https://django-storages.readthedocs.io/en/latest/backends/azure.html)
+
+```bash
+$ python manage.py collectstatic
+```
+
+## Create user admin
+
+```bash
+$ python manage.py createsuperuser --username=joe --email=joe@example.com
+# or
+$ python manage.py createsuperuser
 ```

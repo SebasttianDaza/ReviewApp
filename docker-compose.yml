@@ -80,7 +80,7 @@ services:
     networks:
       - review_app_reader
   review_app_reader_db:
-    image: mongo
+    image: mongo:8
     hostname: review_reader_db
     container_name: review_reader_db
     volumes:
@@ -88,53 +88,31 @@ services:
       - mongodb_config_reader:/data/configdb
     ports:
       - "27017:27017"
-    entrypoint: ["mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db"]
-    environment:
-      MONGO_INITDB_DATABASE: "${MONGO_INIT_DATABASE}"
-      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INIT_ROOT_USERNAME}"
-      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INIT_ROOT_PASSWORD}"
-      MONGO_INITDB_USERNAME: "${MONGO_INIT_USERNAME}"
-      MONGO_INITDB_PASSWORD: "${MONGO_INIT_PASSWORD}"
+    entrypoint: ["mongod", "--replSet", "myReplicaSet", "--bind_ip_all"]
     networks:
       - review_app_reader
   review_app_reader_db_1:
-    image: mongo
+    image: mongo:8
     hostname: review_reader_db_1
     container_name: review_reader_db_1
     volumes:
       - mongodb_data_reader_1:/data/db
       - mongodb_config_reader_1:/data/configdb
-    ports:
-      - "27018:27017"
-    entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db_1" ]
-    environment:
-      MONGO_INITDB_DATABASE: "${MONGO_INIT_DATABASE}"
-      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INIT_ROOT_USERNAME}"
-      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INIT_ROOT_PASSWORD}"
-      MONGO_INITDB_USERNAME: "${MONGO_INIT_USERNAME}"
-      MONGO_INITDB_PASSWORD: "${MONGO_INIT_PASSWORD}"
+    entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip_all"]
     networks:
       - review_app_reader
   review_app_reader_db_2:
-    image: mongo
+    image: mongo:8
     hostname: review_reader_db_2
     container_name: review_reader_db_2
     volumes:
       - mongodb_data_reader_2:/data/db
       - mongodb_config_reader_2:/data/configdb
-    ports:
-      - "27019:27017"
-    entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db_2" ]
-    environment:
-      MONGO_INITDB_DATABASE: "${MONGO_INIT_DATABASE}"
-      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INIT_ROOT_USERNAME}"
-      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INIT_ROOT_PASSWORD}"
-      MONGO_INITDB_USERNAME: "${MONGO_INIT_USERNAME}"
-      MONGO_INITDB_PASSWORD: "${MONGO_INIT_PASSWORD}"
+    entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip_all"]
     networks:
       - review_app_reader
   review_app_reader_setup:
-    image: mongo
+    image: mongo:8
     container_name: review_reader_db_setup
     depends_on:
       - review_app_reader_db
@@ -168,8 +146,8 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
   review_app_azurite:
-    container_name: review_app_azurite
-    hostname: review_app_azurite
+    container_name: "${AZURE_DOMAIN}"
+    hostname: "${AZURE_DOMAIN}"
     image: mcr.microsoft.com/azure-storage/azurite
     command: "azurite --loose --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002 --skipApiVersionCheck"
     ports:
