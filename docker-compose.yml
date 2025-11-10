@@ -30,7 +30,11 @@ services:
       - "9090:8000"
     networks:
       - review_app
+      - review_app_azfunctions
+    #extra_hosts: To connect to azurite without network
+     # - "host.docker.internal:host-gateway"
     depends_on:
+      - review_app_azurite
       - review_app_db
       - review_app_redis
   review_app_nginx:
@@ -46,9 +50,11 @@ services:
     depends_on:
       - review_app_auth_publisher_py
       - review_app_reader
+      - review_app_azurite
     networks:
       - review_app
       - review_app_reader
+      - review_app_azfunctions
   review_app_reader:
     build:
       context: ./reader
@@ -84,10 +90,11 @@ services:
       - "27017:27017"
     entrypoint: ["mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db"]
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_USERNAME: reader
-      MONGO_INITDB_PASSWORD: reader
+      MONGO_INITDB_DATABASE: "${MONGO_INIT_DATABASE}"
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INIT_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INIT_ROOT_PASSWORD}"
+      MONGO_INITDB_USERNAME: "${MONGO_INIT_USERNAME}"
+      MONGO_INITDB_PASSWORD: "${MONGO_INIT_PASSWORD}"
     networks:
       - review_app_reader
   review_app_reader_db_1:
@@ -101,10 +108,11 @@ services:
       - "27018:27017"
     entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db_1" ]
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_USERNAME: reader
-      MONGO_INITDB_PASSWORD: reader
+      MONGO_INITDB_DATABASE: "${MONGO_INIT_DATABASE}"
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INIT_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INIT_ROOT_PASSWORD}"
+      MONGO_INITDB_USERNAME: "${MONGO_INIT_USERNAME}"
+      MONGO_INITDB_PASSWORD: "${MONGO_INIT_PASSWORD}"
     networks:
       - review_app_reader
   review_app_reader_db_2:
@@ -118,10 +126,11 @@ services:
       - "27019:27017"
     entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db_2" ]
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_USERNAME: reader
-      MONGO_INITDB_PASSWORD: reader
+      MONGO_INITDB_DATABASE: "${MONGO_INIT_DATABASE}"
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INIT_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INIT_ROOT_PASSWORD}"
+      MONGO_INITDB_USERNAME: "${MONGO_INIT_USERNAME}"
+      MONGO_INITDB_PASSWORD: "${MONGO_INIT_PASSWORD}"
     networks:
       - review_app_reader
   review_app_reader_setup:
@@ -135,11 +144,17 @@ services:
       - ./reader:/reader
     restart: "no"
     entrypoint: [ "bash", "/reader/mongo_setup.sh" ]
+    networks:
+      - review_app_reader
   review_app_azure_function:
     container_name: review_app_azfunction
     build:
       context: ./Migration
-      dockerfile: Dockerfile
+      # Update file to Dockerfile on prod or need to prove with azfunction dotnet
+      dockerfile: Dockerfile-dev
+    # Comment this volume on prod or need to prove with azfunction dotnet
+    volumes:
+      - ./Migration:/home/site/wwwroot
     ports:
       - "7071:80"
     environment:
@@ -154,8 +169,9 @@ services:
       - "host.docker.internal:host-gateway"
   review_app_azurite:
     container_name: review_app_azurite
+    hostname: review_app_azurite
     image: mcr.microsoft.com/azure-storage/azurite
-    command: "azurite --loose --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002"
+    command: "azurite --loose --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002 --skipApiVersionCheck"
     ports:
       - "10000:10000" # Blob service
       - "10001:10001" # Queue service
@@ -180,3 +196,4 @@ volumes:
   mongodb_data_reader_2:
   mongodb_config_reader_2:
   azurite_data:
+  azurite_function:

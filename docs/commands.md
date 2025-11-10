@@ -30,3 +30,11 @@ $ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./build/revie
 ```bash
 $  docker compose up -d --wait --remove-orphans
 ```
+
+## Install Azure storage explorer
+
+```bash
+sudo apt update
+sudo apt install snapd
+sudo snap install storage-explorer
+```

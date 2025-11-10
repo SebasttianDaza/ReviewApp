@@ -8,3 +8,7 @@ django-environ
 google-auth
 redis
 Pillow
+azure-storage-queue
+azure-identity
+azure-storage-blob
+django-storages[azure]
