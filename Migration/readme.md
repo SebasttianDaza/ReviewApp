@@ -9,3 +9,7 @@ For a `TimerTrigger` to work, you provide a schedule in the form of a [cron expr
 ## Learn more
 
 <TODO> Documentation
+
+https://github.com/Azure/azure-functions-core-tools/blob/v4.x/README.md#linux
+https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-install?tabs=dotnet8&pivots=os-linux-ubuntu-2204
+https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=linux%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-csharp
