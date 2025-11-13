@@ -141,10 +141,12 @@ services:
     depends_on:
       - review_app_db
       - review_app_azurite
+      - review_app_reader_db
+      - review_app_reader_db_1
+      - review_app_reader_db_2
     networks:
       - review_app_azfunctions
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - review_app_reader
   review_app_azurite:
     container_name: "${AZURE_DOMAIN}"
     hostname: "${AZURE_DOMAIN}"

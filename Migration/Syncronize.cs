@@ -2,6 +2,7 @@ using System;
 using Azure.Storage.Queues.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using Migration.Services;
 
 namespace Migration;
 
@@ -9,7 +10,7 @@ public class Syncronize
 {
     private readonly ILogger<Syncronize> _logger;
 
-    public Syncronize(ILogger<Syncronize> logger)
+    public Syncronize(ILogger<Syncronize> logger, ReviewService reviewService)
     {
         _logger = logger;
     }
