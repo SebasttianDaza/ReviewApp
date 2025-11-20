@@ -3,6 +3,7 @@ using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Migration.Documents;
+using Migration.Models;
 using Migration.Services;
 
 var builder = FunctionsApplication.CreateBuilder(args);
@@ -16,7 +17,11 @@ builder.Services
 builder.Services.Configure<ReaderDatabaseSettings>(
     builder.Configuration.GetSection("ReaderDatabaseSettings")
 );
+builder.Services.Configure<PublisherDatabaseSettings>(
+    builder.Configuration.GetSection("PublisherDatabaseSettings")
+);
 
-builder.Services.AddSingleton<ReviewService>();
+builder.Services.AddSingleton<ReviewPublisherService>();
+builder.Services.AddSingleton<ReviewReaderService>();
 
 builder.Build().Run();

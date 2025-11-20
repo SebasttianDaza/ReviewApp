@@ -147,6 +147,7 @@ services:
     networks:
       - review_app_azfunctions
       - review_app_reader
+      - review_app
   review_app_azurite:
     container_name: "${AZURE_DOMAIN}"
     hostname: "${AZURE_DOMAIN}"
