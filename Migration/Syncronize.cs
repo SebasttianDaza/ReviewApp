@@ -12,12 +12,12 @@ namespace Migration;
 public class Syncronize
 {
     private readonly ILogger<Syncronize> _logger;
-    private readonly ReviewPublisherService _reviewPublisher;
+    private readonly PublisherReviewService _publisherReview;
 
-    public Syncronize(ILogger<Syncronize> logger, ReviewReaderService reviewReaderService, ReviewPublisherService reviewPublisherService)
+    public Syncronize(ILogger<Syncronize> logger, ReviewReaderService reviewReaderService, PublisherReviewService publisherReviewService)
     {
         _logger = logger;
-        _reviewPublisher = reviewPublisherService;
+        _publisherReview = publisherReviewService;
     }
 
     [Function(nameof(Syncronize))]
@@ -26,7 +26,10 @@ public class Syncronize
         var messageDecoding = Encoding.UTF8.GetString(Convert.FromBase64String(message.MessageText));
         _logger.LogInformation("C# Queue trigger function processed: {messageText}", messageDecoding);
         MessageModel messageItem = JsonSerializer.Deserialize<MessageModel>(messageDecoding);
-        var item = await _reviewPublisher.GetOneAsync(messageItem.Id);
-        _logger.LogInformation("{test}",  item);
+        
+        //await _reviewPublisher.TestConnectionAsync();
+        
+        var item = await _publisherReview.GetOneAsync(messageItem.Id);
+        _logger.LogInformation("{test}", item.Title);
     }   
 }

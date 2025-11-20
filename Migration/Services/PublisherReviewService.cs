@@ -3,7 +3,7 @@ using Migration.Models;
 
 namespace Migration.Services;
 
-public class ReviewPublisherService (IOptions<PublisherDatabaseSettings> settings)
+public class PublisherReviewService (IOptions<PublisherDatabaseSettings> settings)
     : SqlService<ReviewModel>(settings, settings.Value.ReviewTableName)
 {
     

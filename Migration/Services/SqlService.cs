@@ -4,6 +4,7 @@ using Migration.Models;
 using System.Reflection;
 using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
+using System;
 
 namespace Migration.Services;
 
@@ -24,9 +25,9 @@ public class SqlService<T> where T : new()
     
     private MySqlConnection CreateConnection() => new MySqlConnection(_connectionString);
 
-    public async Task<T?> GetOneAsync(int id)
+    public async Task<T?> GetOneAsync(long id)
     {
-        var query = $"SELECT * FROM `{_tableName}` WHERE id = @Id";
+        var query = $"SELECT * FROM {_tableName} WHERE id = @Id";
         await using var connection = CreateConnection();
         await using var cmd = new MySqlCommand(query, connection);
         cmd.Parameters.AddWithValue("@Id", id);
@@ -54,5 +55,16 @@ public class SqlService<T> where T : new()
         }
         
         return entity;
+    }
+
+    public async Task TestConnectionAsync()
+    {
+        var query = $"SELECT COUNT(*) FROM {_tableName}";
+        await using var conn = CreateConnection();
+        await conn.OpenAsync();
+        Console.WriteLine("Connected OK mysql");
+        
+        await using var cmd = new MySqlCommand(query, conn);
+        Console.WriteLine(Convert.ToInt32(await cmd.ExecuteScalarAsync()));
     }
 }
