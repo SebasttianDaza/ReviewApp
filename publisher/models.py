@@ -138,25 +138,29 @@ class Review(models.Model):
     image = models.ForeignKey(
         Image,
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        blank=True
     )
     # Many to one
     video = models.ForeignKey(
         Video,
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        blank=True
     )
     # Many to one
     len = models.ForeignKey(
         Len,
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        blank=True
     )
     # Many to one
     camera = models.ForeignKey(
         Camera,
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        blank=True
     )
     date_created = models.DateTimeField(
         auto_now_add=True,
