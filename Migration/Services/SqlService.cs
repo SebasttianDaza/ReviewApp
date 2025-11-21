@@ -8,10 +8,11 @@ using System;
 
 namespace Migration.Services;
 
-public class SqlService<T> where T : new()
+public class SqlService<T> : ISqlService where T : new()
 {
     private readonly string _connectionString;
     private readonly string _tableName;
+    public string TableName => _tableName;
     private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _propsCache = new();
 
     protected SqlService(
@@ -25,7 +26,12 @@ public class SqlService<T> where T : new()
     
     private MySqlConnection CreateConnection() => new MySqlConnection(_connectionString);
 
-    public async Task<T?> GetOneAsync(long id)
+    public async Task<object?> GetOneAsync(long id)
+    {
+        return await GetOneTypeAsync(id);
+    }
+
+    private async Task<T?> GetOneTypeAsync(long id)
     {
         var query = $"SELECT * FROM {_tableName} WHERE id = @Id";
         await using var connection = CreateConnection();
@@ -47,7 +53,7 @@ public class SqlService<T> where T : new()
 
         foreach (var prop in props)
         {
-            var sqlName = prop.Name;
+            var sqlName = ToSnakeCase(prop.Name);
             if (!columnNames.Contains(sqlName)) continue;
             var value = reader[sqlName];
             if (value == DBNull.Value) continue;
@@ -55,6 +61,17 @@ public class SqlService<T> where T : new()
         }
         
         return entity;
+    }
+
+    private static string ToSnakeCase(string input)
+    {
+        return string.Concat(
+            input.Select((x, i) => 
+                i > 0 && char.IsUpper(x)
+                ? $"_{x}"
+                : x.ToString()
+            )
+        ).ToLower();
     }
 
     public async Task TestConnectionAsync()

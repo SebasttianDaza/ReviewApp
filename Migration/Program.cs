@@ -21,7 +21,8 @@ builder.Services.Configure<PublisherDatabaseSettings>(
     builder.Configuration.GetSection("PublisherDatabaseSettings")
 );
 
-builder.Services.AddSingleton<PublisherReviewService>();
+builder.Services.AddSingleton<ISqlService, PublisherReviewService>();
 builder.Services.AddSingleton<ReviewReaderService>();
+builder.Services.AddSingleton<SqlServiceResolver>();
 
 builder.Build().Run();
