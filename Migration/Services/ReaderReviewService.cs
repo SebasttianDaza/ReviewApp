@@ -3,7 +3,7 @@ using Migration.Documents;
 
 namespace Migration.Services;
 
-public class ReviewReaderService(IOptions<ReaderDatabaseSettings> settings)
+public class ReaderReviewService(IOptions<ReaderDatabaseSettings> settings)
     : MongoService<ReviewDocument>(settings, settings.Value.ReviewCollectionName)
 {
     

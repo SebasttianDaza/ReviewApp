@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace Migration.Services;
 
-public class MongoService<T>
+public class MongoService<T> where T : IDocument
 {
     protected readonly IMongoCollection<T> Collection;
     
@@ -25,4 +25,7 @@ public class MongoService<T>
     }
     
     public async Task CreateAsync(T item) => await Collection.InsertOneAsync(item);
+    
+    public async Task<T?> GetAsync(string id) =>
+        await Collection.Find(x => x.Id == id).FirstOrDefaultAsync();
 }

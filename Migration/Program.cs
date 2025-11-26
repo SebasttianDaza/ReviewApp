@@ -22,7 +22,7 @@ builder.Services.Configure<PublisherDatabaseSettings>(
 );
 
 builder.Services.AddSingleton<ISqlService, PublisherReviewService>();
-builder.Services.AddSingleton<ReviewReaderService>();
+builder.Services.AddSingleton<ReaderReviewService>();
 builder.Services.AddSingleton<SqlServiceResolver>();
 
 builder.Build().Run();

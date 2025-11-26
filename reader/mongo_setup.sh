@@ -63,13 +63,16 @@ db.createCollection("reader_review", {
   validator: {
     "\$jsonSchema": {
       bsonType: "object",
-      required: ["title", "subtitle", "body", "date_created", "date_update"],
+      required: ["title", "subtitle", "body", "date_created", "date_updated"],
       properties: {
         title: { bsonType: "string" },
         subtitle: { bsonType: "string" },
         body: { bsonType: "string" },
         date_created: { bsonType: "date" },
-        date_update: { bsonType: "date" }
+        date_updated: { bsonType: "date" },
+        video: { bsonType: "object" },
+        image: { bsonType: "object" },
+        len: { bsonType: "object" }
       }
     }
   }
