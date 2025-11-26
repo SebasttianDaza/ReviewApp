@@ -22,6 +22,10 @@ builder.Services.Configure<PublisherDatabaseSettings>(
 );
 
 builder.Services.AddSingleton<ISqlService, PublisherReviewService>();
+builder.Services.AddSingleton<ISqlService, PublisherImageService>();
+builder.Services.AddSingleton<ISqlService, PublisherVideoService>();
+builder.Services.AddSingleton<ISqlService, PublisherLenService>();
+builder.Services.AddSingleton<ISqlService, PublisherCameraService>();
 builder.Services.AddSingleton<ReaderReviewService>();
 builder.Services.AddSingleton<SqlServiceResolver>();
 

@@ -35,6 +35,6 @@ public class ReviewDocument: IDocument
     public Video? Video { get; set; }
     [BsonElement("image")]
     public Image? Image { get; set; }
-    [BsonElment("len")]
+    [BsonElement("len")]
     public LenDocument? Len { get; set; }
 }

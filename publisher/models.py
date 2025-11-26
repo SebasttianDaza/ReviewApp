@@ -23,7 +23,7 @@ class Video(models.Model):
 
     title = models.CharField(max_length=100, null=False, unique=True)
     description = models.TextField()
-    source_id = models.CharField(max_length=100, null=True, unique=True)
+    source_id = models.CharField(max_length=100, null=False, unique=True)
     source = models.CharField(max_length=10, null=False, choices={"YT": "YouTube"})
     credit = models.CharField(max_length=15, null=False)
     author = models.ManyToManyField(
@@ -44,14 +44,14 @@ class Video(models.Model):
 
 class Len(models.Model):
     def __str__(self):
-        return self.modelName
+        return self.model_name
 
-    modelName = models.CharField(max_length=100, null=False, unique=True)
-    versionName = models.CharField(max_length=100, null=False)
+    model_name = models.CharField(max_length=100, null=False, unique=True)
+    version_name = models.CharField(max_length=100, null=False)
     description = models.TextField(null=False)
-    maxResolution = models.IntegerField(null=False)
+    max_resolution = models.IntegerField(null=False)
     sensorSize = models.IntegerField(null=False)
-    effectivePixels = models.IntegerField(null=False)
+    effective_pixels = models.IntegerField(null=False)
     image = models.ForeignKey(
         Image,
         on_delete=models.RESTRICT,
@@ -60,7 +60,8 @@ class Len(models.Model):
     video = models.ForeignKey(
         Video,
         on_delete=models.RESTRICT,
-        null=True
+        null=True,
+        blank=True
     )
     author = models.ManyToManyField(
         User,
@@ -95,13 +96,15 @@ class Camera(models.Model):
         Image,
         on_delete=models.RESTRICT,
         null=True,
+        blank=True,
         related_name="%(app_label)s_%(class)s_related"
     )
     # One to many
     video = models.ForeignKey(
         Video,
         on_delete=models.RESTRICT,
-        null=True,
+        blank=True,
+        null=True
     )
     # Many to many
     author = models.ManyToManyField(
