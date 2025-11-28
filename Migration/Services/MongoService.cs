@@ -28,4 +28,7 @@ public class MongoService<T> where T : IDocument
     
     public async Task<T?> GetAsync(string id) =>
         await Collection.Find(x => x.Id == id).FirstOrDefaultAsync();
+
+    public async Task UpdateAsync(string id, T updatedItem) =>
+        await Collection.ReplaceOneAsync(x => x.Id == id, updatedItem);
 }

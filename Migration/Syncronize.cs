@@ -41,6 +41,7 @@ public class Syncronize
         {
             MessageModel? messageItem = JsonSerializer.Deserialize<MessageModel>(messageDecoding);
             //await _reviewPublisher.TestConnectionAsync();
+            _logger.LogInformation("{functionName} - Getting sql services");
             var currentService = _sqlServiceResolver.Resolve(messageItem.TableName);
             var item = await currentService.GetOneAsync(messageItem.Id);
             var imageService = _sqlServiceResolver.Resolve(_settings.Value.ImageTableName) as PublisherImageService;
@@ -52,16 +53,17 @@ public class Syncronize
                 _logger.LogInformation("{functionName} - Get one review: {reviewId} ", _functionName, reviewModel.Id);
                 ReviewDocument? reviewDocument = await readerReviewService.GetAsync(reviewModel.Id.ToString());
                 
+                _logger.LogInformation(
+                    "{functionName} - querying for image, video, len and cameras related",
+                    _functionName
+                );
+                    
+                ImageModel? image = await imageService.GetOneAsync(reviewModel.ImageId) as ImageModel;
+                VideoModel? video = await videoService.GetOneAsync(reviewModel.VideoId) as VideoModel;
+                
                 if (messageItem.Type.Equals("create") || reviewDocument is null)
                 {
                     _logger.LogInformation("{functionName} - Creating review", _functionName);
-                    _logger.LogInformation(
-                        "{functionName} - querying for image, video, len and cameras related",
-                        _functionName
-                    );
-                    
-                    ImageModel? image = await imageService.GetOneAsync(reviewModel.ImageId) as ImageModel;
-                    VideoModel? video = await videoService.GetOneAsync(reviewModel.VideoId) as VideoModel;
                     
                     await readerReviewService.CreateAsync(
                         new ReviewDocument
@@ -81,6 +83,18 @@ public class Syncronize
                 else
                 {
                     _logger.LogInformation("{functionName} - Updating review", _functionName);
+
+                    reviewDocument.Title = reviewModel.Title;
+                    reviewDocument.Subtitle = reviewModel.Subtitle;
+                    reviewDocument.Body = reviewModel.Body;
+                    reviewDocument.DateUpdated = reviewModel.DateUpdated;
+                    reviewDocument.Video = videoService.CreateDocument(video);
+                    reviewDocument.Image = imageService.CreateDocument(image);
+                    
+                    await readerReviewService.UpdateAsync(
+                        reviewDocument.Id,
+                        reviewDocument
+                    );
                 }
             }
         }
