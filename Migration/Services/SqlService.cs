@@ -26,12 +26,13 @@ public class SqlService<T> : ISqlService where T : new()
     
     private MySqlConnection CreateConnection() => new MySqlConnection(_connectionString);
 
-    public async Task<object?> GetOneAsync(long id)
+    public async Task<object?> GetOneAsync(long? id)
     {
+        if (id is null) return null;
         return await GetOneTypeAsync(id);
     }
 
-    private async Task<T?> GetOneTypeAsync(long id)
+    private async Task<T?> GetOneTypeAsync(long? id)
     {
         var query = $"SELECT * FROM {_tableName} WHERE id = @Id";
         await using var connection = CreateConnection();

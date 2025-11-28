@@ -4,5 +4,5 @@ public interface ISqlService
 {
     string TableName { get; }
 
-    Task<object?> GetOneAsync(long id);
+    Task<object?> GetOneAsync(long? id);
 }

@@ -6,7 +6,7 @@ namespace Migration.Documents;
 public class Video
 {
     [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
+    [BsonRepresentation(BsonType.String)]
     public string? Id { get; set; }
     
     public string Title { get; set; }

@@ -70,9 +70,9 @@ db.createCollection("reader_review", {
         body: { bsonType: "string" },
         date_created: { bsonType: "date" },
         date_updated: { bsonType: "date" },
-        video: { bsonType: "object" },
-        image: { bsonType: "object" },
-        len: { bsonType: "object" }
+        video: { bsonType: ["object", "null"] },
+        image: { bsonType: ["object", "null"] },
+        len: { bsonType: ["object", "null"] }
       }
     }
   }
