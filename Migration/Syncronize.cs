@@ -91,6 +91,7 @@ public class Syncronize
                     reviewDocument.DateUpdated = reviewModel.DateUpdated;
                     reviewDocument.Video = videoService.CreateDocument(video);
                     reviewDocument.Image = imageService.CreateDocument(image);
+                    reviewDocument.Len = await lenService.CreateDocument(len);
                     
                     await readerReviewService.UpdateAsync(
                         reviewDocument.Id,
