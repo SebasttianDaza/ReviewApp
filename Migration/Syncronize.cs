@@ -44,11 +44,12 @@ public class Syncronize
             _logger.LogInformation("{functionName} - Getting sql services");
             var currentService = _sqlServiceResolver.Resolve(messageItem.TableName);
             var item = await currentService.GetOneAsync(messageItem.Id);
-            var imageService = _sqlServiceResolver.Resolve(_settings.Value.ImageTableName) as PublisherImageService;
-            var videoService = _sqlServiceResolver.Resolve(_settings.Value.VideoTableName) as PublisherVideoService;
+            PublisherImageService? imageService = _sqlServiceResolver.Resolve(_settings.Value.ImageTableName) as PublisherImageService;
+            PublisherVideoService? videoService = _sqlServiceResolver.Resolve(_settings.Value.VideoTableName) as PublisherVideoService;
 
             if (item is ReviewModel reviewModel)
-            {   
+            {
+                PublisherLenService? lenService = _sqlServiceResolver.Resolve(_settings.Value.LenTableName) as PublisherLenService;
                 ReaderReviewService readerReviewService = _provider.GetRequiredService<ReaderReviewService>();
                 _logger.LogInformation("{functionName} - Get one review: {reviewId} ", _functionName, reviewModel.Id);
                 ReviewDocument? reviewDocument = await readerReviewService.GetAsync(reviewModel.Id.ToString());
@@ -57,9 +58,9 @@ public class Syncronize
                     "{functionName} - querying for image, video, len and cameras related",
                     _functionName
                 );
-                    
                 ImageModel? image = await imageService.GetOneAsync(reviewModel.ImageId) as ImageModel;
                 VideoModel? video = await videoService.GetOneAsync(reviewModel.VideoId) as VideoModel;
+                LenModel? len = await lenService.GetOneAsync(reviewModel.LenId) as LenModel;
                 
                 if (messageItem.Type.Equals("create") || reviewDocument is null)
                 {
@@ -76,7 +77,7 @@ public class Syncronize
                             DateUpdated = reviewModel.DateUpdated,
                             Video = videoService.CreateDocument(video),   
                             Image = imageService.CreateDocument(image),
-                            Len =  null
+                            Len =  await lenService.CreateDocument(len)
                         }
                     );
                 }
