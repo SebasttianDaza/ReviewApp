@@ -5,32 +5,31 @@ using Migration.Documents;
 
 namespace Migration.Services;
 
-public class PublisherLenService (IOptions<PublisherDatabaseSettings> settings, SqlServiceResolver sqlServiceResolver)
-    : SqlService<LenModel>(settings, settings.Value.LenTableName)
+public class PublisherLenService (
+    IOptions<PublisherDatabaseSettings> settings, 
+    IServiceProvider provider
+    ) : SqlService<LenModel>(settings, settings.Value.LenTableName)
 {
-    public async Task <LenDocument?> CreateDocument(LenModel? len)
+    public async Task <Len?> CreateDocument(LenModel? len)
     {
         if (len is null) return null;
         
-        PublisherImageService? imageService = sqlServiceResolver.Resolve(settings.Value.ImageTableName) as PublisherImageService;
-        PublisherVideoService? videoService = sqlServiceResolver.Resolve(settings.Value.VideoTableName) as PublisherVideoService;
+        PublisherImageService imageService = provider.GetRequiredService<PublisherImageService>();
+        PublisherVideoService videoService = provider.GetRequiredService<PublisherVideoService>();
         
         ImageModel? image = await imageService.GetOneAsync(len.ImageId) as ImageModel;
         VideoModel? video = await videoService.GetOneAsync(len.VideoId) as VideoModel;
         
-        return new LenDocument
+        return new Len
         {
             Id = len.Id.ToString(),
             ModelName = len.ModelName,
             VersionName = len.VersionName,
-            Description = len.Description,
             MaxResolution = len.MaxResolution,
             SensorSize = len.SensorSize,
             EffectivePixels = len.EffectivePixels,
-            DateCreated = len.DateCreated,
-            DateUpdated = len.DateUpdated,
             Video = videoService.CreateDocument(video),
-            Image = imageService.CreateDocument(image),
+            Image = imageService.CreateDocument(image)
         };
     }
 }

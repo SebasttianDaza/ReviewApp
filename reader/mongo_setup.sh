@@ -72,7 +72,8 @@ db.createCollection("reader_review", {
         date_updated: { bsonType: "date" },
         video: { bsonType: ["object", "null"] },
         image: { bsonType: ["object", "null"] },
-        len: { bsonType: ["object", "null"] }
+        len: { bsonType: ["object", "null"] },
+        camera: { bsonType: ["object", "null"] }
       }
     }
   }

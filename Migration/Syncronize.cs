@@ -46,6 +46,7 @@ public class Syncronize
             var item = await currentService.GetOneAsync(messageItem.Id);
             PublisherImageService? imageService = _sqlServiceResolver.Resolve(_settings.Value.ImageTableName) as PublisherImageService;
             PublisherVideoService? videoService = _sqlServiceResolver.Resolve(_settings.Value.VideoTableName) as PublisherVideoService;
+            PublisherCameraService? cameraService = _sqlServiceResolver.Resolve(_settings.Value.CameraTableName) as PublisherCameraService;
 
             if (item is ReviewModel reviewModel)
             {
@@ -61,6 +62,7 @@ public class Syncronize
                 ImageModel? image = await imageService.GetOneAsync(reviewModel.ImageId) as ImageModel;
                 VideoModel? video = await videoService.GetOneAsync(reviewModel.VideoId) as VideoModel;
                 LenModel? len = await lenService.GetOneAsync(reviewModel.LenId) as LenModel;
+                CameraModel? camera = await cameraService.GetOneAsync(reviewModel.CameraId) as CameraModel;
                 
                 if (messageItem.Type.Equals("create") || reviewDocument is null)
                 {
@@ -77,7 +79,8 @@ public class Syncronize
                             DateUpdated = reviewModel.DateUpdated,
                             Video = videoService.CreateDocument(video),   
                             Image = imageService.CreateDocument(image),
-                            Len =  await lenService.CreateDocument(len)
+                            Len =  await lenService.CreateDocument(len),
+                            Camera = await cameraService.CreateDocument(camera)
                         }
                     );
                 }
@@ -92,6 +95,7 @@ public class Syncronize
                     reviewDocument.Video = videoService.CreateDocument(video);
                     reviewDocument.Image = imageService.CreateDocument(image);
                     reviewDocument.Len = await lenService.CreateDocument(len);
+                    reviewDocument.Camera = await cameraService.CreateDocument(camera);
                     
                     await readerReviewService.UpdateAsync(
                         reviewDocument.Id,

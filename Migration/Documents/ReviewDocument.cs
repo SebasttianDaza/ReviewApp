@@ -36,5 +36,7 @@ public class ReviewDocument: IDocument
     [BsonElement("image")]
     public Image? Image { get; set; }
     [BsonElement("len")]
-    public LenDocument? Len { get; set; }
+    public Len? Len { get; set; }
+    [BsonElement("camera")]
+    public Camera? Camera { get; set; }
 }

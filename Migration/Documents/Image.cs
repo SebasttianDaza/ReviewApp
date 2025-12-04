@@ -9,6 +9,8 @@ public class Image
     [BsonRepresentation(BsonType.String)]
     public string? Id { get; set; }
     
+    [BsonElement("title")]
     public string Title { get; set; }
+    [BsonElement("path")]
     public string Path { get; set; }
 }
