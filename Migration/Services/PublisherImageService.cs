@@ -13,7 +13,6 @@ public class PublisherImageService (IOptions<PublisherDatabaseSettings> settings
 
         return new Image
         {
-            Id = image.Id.ToString(),
             Title = image.Title,
             Path = image.Image
         };

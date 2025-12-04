@@ -13,7 +13,6 @@ public class PublisherVideoService(IOptions<PublisherDatabaseSettings> settings)
 
         return new Video
         {
-            Id = video.Id.ToString(),
             Title = video.Title,
             Description = video.Description,
             SourceId =  video.SourceId,
