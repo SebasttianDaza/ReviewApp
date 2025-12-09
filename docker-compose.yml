@@ -68,15 +68,70 @@ services:
     networks:
       - review_app_reader
     depends_on:
-      - review_app_reader_redis
+      - review_app_reader_redis_sentinel
       - review_app_reader_setup
-  review_app_reader_redis:
+  review_app_reader_redis_master:
     image: 'redis:7.2.4-alpine'
-    deploy:
-      replicas: 3
+    container_name: review_reader_redis_mt
+    hostname: review_app_reader_redis_master
+    command: "redis-server --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
     environment:
-      - PORT=6378
-    command: "redis-server --save 20 1 --loglevel warning --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+      - REDIS_CACHE_USER=${REDIS_CACHE_USER}
+      - REDIS_CACHE_PASSWORD=${REDIS_CACHE_PASSWORD}
+    networks:
+      - review_app_reader
+  review_app_reader_redis_1:
+    image: 'redis:7.2.4-alpine'
+    container_name: review_reader_redis_1
+    command: "redis-server --replicaof review_app_reader_redis_master 6379 --masterauth ${REDIS_CACHE_PASSWORD} --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+    depends_on:
+      - review_app_reader_redis_master
+    environment:
+      - REDIS_CACHE_USER=${REDIS_CACHE_USER}
+      - REDIS_CACHE_PASSWORD=${REDIS_CACHE_PASSWORD}
+    networks:
+      - review_app_reader
+  review_app_reader_redis_2:
+    image: 'redis:7.2.4-alpine'
+    container_name: review_reader_redis_2
+    command: "redis-server --replicaof review_app_reader_redis_master 6379 --masterauth ${REDIS_CACHE_PASSWORD} --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+    depends_on:
+      - review_app_reader_redis_master
+    environment:
+      - REDIS_CACHE_USER=${REDIS_CACHE_USER}
+      - REDIS_CACHE_PASSWORD=${REDIS_CACHE_PASSWORD}
+    networks:
+      - review_app_reader
+  review_app_reader_redis_3:
+    image: 'redis:7.2.4-alpine'
+    container_name: review_reader_redis_3
+    command: "redis-server --replicaof review_app_reader_redis_master 6379 --masterauth ${REDIS_CACHE_PASSWORD} --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+    depends_on:
+      - review_app_reader_redis_master
+    environment:
+      - REDIS_CACHE_USER=${REDIS_CACHE_USER}
+      - REDIS_CACHE_PASSWORD=${REDIS_CACHE_PASSWORD}
+    networks:
+      - review_app_reader
+  review_app_reader_redis_sentinel:
+    image: 'redis:7.2.4-alpine'
+    container_name: review_reader_redis_sn
+    command: >
+      sh -c '
+      mkdir -p /usr/local/etc/;
+      echo "sentinel monitor my_master review_app_reader_redis_master 6379 1" > /usr/local/etc/sentinel.conf;
+      echo "sentinel auth-pass my_master ${REDIS_CACHE_PASSWORD}" >> /usr/local/etc/sentinel.conf;
+      echo "sentinel resolve-hostnames yes" > /usr/local/etc/sentinel.conf;
+      redis-sentinel /usr/local/etc/sentinel.conf
+      '
+    depends_on:
+      - review_app_reader_redis_master
+      - review_app_reader_redis_1
+      - review_app_reader_redis_2
+      - review_app_reader_redis_3
+    environment:
+      - REDIS_CACHE_USER=${REDIS_CACHE_USER}
+      - REDIS_CACHE_PASSWORD=${REDIS_CACHE_PASSWORD}
     networks:
       - review_app_reader
   review_app_reader_db:
