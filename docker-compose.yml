@@ -75,6 +75,7 @@ services:
     container_name: review_reader_redis_mt
     hostname: review_app_reader_redis_master
     command: "redis-server --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+    mem_limit: 512m
     environment:
       - REDIS_CACHE_USER=${REDIS_CACHE_USER}
       - REDIS_CACHE_PASSWORD=${REDIS_CACHE_PASSWORD}
@@ -83,7 +84,9 @@ services:
   review_app_reader_redis_1:
     image: 'redis:7.2.4-alpine'
     container_name: review_reader_redis_1
+    hostname: review_reader_redis_1
     command: "redis-server --replicaof review_app_reader_redis_master 6379 --masterauth ${REDIS_CACHE_PASSWORD} --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+    mem_limit: 512m
     depends_on:
       - review_app_reader_redis_master
     environment:
@@ -94,7 +97,9 @@ services:
   review_app_reader_redis_2:
     image: 'redis:7.2.4-alpine'
     container_name: review_reader_redis_2
+    hostname: review_reader_redis_2
     command: "redis-server --replicaof review_app_reader_redis_master 6379 --masterauth ${REDIS_CACHE_PASSWORD} --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+    mem_limit: 512m
     depends_on:
       - review_app_reader_redis_master
     environment:
@@ -105,7 +110,9 @@ services:
   review_app_reader_redis_3:
     image: 'redis:7.2.4-alpine'
     container_name: review_reader_redis_3
+    hostname: review_reader_redis_3
     command: "redis-server --replicaof review_app_reader_redis_master 6379 --masterauth ${REDIS_CACHE_PASSWORD} --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+    mem_limit: 512m
     depends_on:
       - review_app_reader_redis_master
     environment:
@@ -118,11 +125,10 @@ services:
     container_name: review_reader_redis_sn
     command: >
       sh -c '
-      mkdir -p /usr/local/etc/;
-      echo "sentinel monitor my_master review_app_reader_redis_master 6379 1" > /usr/local/etc/sentinel.conf;
-      echo "sentinel auth-pass my_master ${REDIS_CACHE_PASSWORD}" >> /usr/local/etc/sentinel.conf;
-      echo "sentinel resolve-hostnames yes" > /usr/local/etc/sentinel.conf;
-      redis-sentinel /usr/local/etc/sentinel.conf
+      echo "sentinel monitor my_master review_app_reader_redis_master 6379 1" >> /etc/sentinel.conf;
+      echo "sentinel auth-pass my_master ${REDIS_CACHE_PASSWORD}" >> /etc/sentinel.conf;
+      echo "sentinel resolve-hostnames yes" >> /etc/sentinel.conf;
+      redis-sentinel /etc/sentinel.conf
       '
     depends_on:
       - review_app_reader_redis_master
