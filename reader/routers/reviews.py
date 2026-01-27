@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request
-from reader.models import ReviewReader, JSONAPIResponse
+from reader.models import ReviewReader
+from reader.schemas.jsonapi import JSONAPIResponse
 
 router = APIRouter(
     prefix="/reviews",

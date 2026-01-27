@@ -3,3 +3,4 @@ mongoengine
 pydantic-settings
 python-dotenv
 pydantic
+redis

@@ -68,13 +68,19 @@ services:
     networks:
       - review_app_reader
     depends_on:
+      - review_app_reader_redis_1
+      - review_app_reader_redis_2
+      - review_app_reader_redis_3
+      - review_app_reader_redis_master
       - review_app_reader_redis_sentinel
       - review_app_reader_setup
   review_app_reader_redis_master:
-    image: 'redis:7.2.4-alpine'
+    image: 'redis/redis-stack:latest'
     container_name: review_reader_redis_mt
     hostname: review_app_reader_redis_master
-    command: "redis-server --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+    volumes:
+      - ./build/redis.conf:/usr/local/etc/redis/redis.conf
+    command: "redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_CACHE_PASSWORD}"
     mem_limit: 512m
     environment:
       - REDIS_CACHE_USER=${REDIS_CACHE_USER}
@@ -82,10 +88,16 @@ services:
     networks:
       - review_app_reader
   review_app_reader_redis_1:
-    image: 'redis:7.2.4-alpine'
+    image: 'redis/redis-stack:latest'
     container_name: review_reader_redis_1
     hostname: review_reader_redis_1
-    command: "redis-server --replicaof review_app_reader_redis_master 6379 --masterauth ${REDIS_CACHE_PASSWORD} --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+    volumes:
+      - ./build/redis.conf:/usr/local/etc/redis/redis.conf
+    command: >
+      redis-server /usr/local/etc/redis/redis.conf
+        --replicaof review_app_reader_redis_master 6379
+        --masterauth ${REDIS_CACHE_PASSWORD}
+        --requirepass ${REDIS_CACHE_PASSWORD}
     mem_limit: 512m
     depends_on:
       - review_app_reader_redis_master
@@ -95,10 +107,16 @@ services:
     networks:
       - review_app_reader
   review_app_reader_redis_2:
-    image: 'redis:7.2.4-alpine'
+    image: 'redis/redis-stack:latest'
     container_name: review_reader_redis_2
     hostname: review_reader_redis_2
-    command: "redis-server --replicaof review_app_reader_redis_master 6379 --masterauth ${REDIS_CACHE_PASSWORD} --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+    volumes:
+      - ./build/redis.conf:/usr/local/etc/redis/redis.conf
+    command: >
+      redis-server /usr/local/etc/redis/redis.conf
+        --replicaof review_app_reader_redis_master 6379
+        --masterauth ${REDIS_CACHE_PASSWORD}
+        --requirepass ${REDIS_CACHE_PASSWORD}
     mem_limit: 512m
     depends_on:
       - review_app_reader_redis_master
@@ -108,10 +126,16 @@ services:
     networks:
       - review_app_reader
   review_app_reader_redis_3:
-    image: 'redis:7.2.4-alpine'
+    image: 'redis/redis-stack:latest'
     container_name: review_reader_redis_3
     hostname: review_reader_redis_3
-    command: "redis-server --replicaof review_app_reader_redis_master 6379 --masterauth ${REDIS_CACHE_PASSWORD} --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+    volumes:
+      - ./build/redis.conf:/usr/local/etc/redis/redis.conf
+    command: >
+      redis-server /usr/local/etc/redis/redis.conf
+        --replicaof review_app_reader_redis_master 6379
+        --masterauth ${REDIS_CACHE_PASSWORD}
+        --requirepass ${REDIS_CACHE_PASSWORD}
     mem_limit: 512m
     depends_on:
       - review_app_reader_redis_master
@@ -123,6 +147,7 @@ services:
   review_app_reader_redis_sentinel:
     image: 'redis:7.2.4-alpine'
     container_name: review_reader_redis_sn
+    hostname: ${REDIS_CACHE_HOST_READER}
     command: >
       sh -c '
       echo "sentinel monitor my_master review_app_reader_redis_master 6379 1" >> /etc/sentinel.conf;
