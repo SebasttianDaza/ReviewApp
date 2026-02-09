@@ -7,4 +7,4 @@ class QueueMessagePublisher(QueueMessageService):
 
     def add_message(self, message):
         import base64
-        self.queue_client.send_message(base64.b64encode(message.encode()))
+        self.queue_client.send_message(base64.b64encode(message.encode('utf-8')))

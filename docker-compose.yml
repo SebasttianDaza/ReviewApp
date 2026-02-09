@@ -68,19 +68,105 @@ services:
     networks:
       - review_app_reader
     depends_on:
-      - review_app_reader_redis
+      - review_app_reader_redis_1
+      - review_app_reader_redis_2
+      - review_app_reader_redis_3
+      - review_app_reader_redis_master
+      - review_app_reader_redis_sentinel
       - review_app_reader_setup
-  review_app_reader_redis:
-    image: 'redis:7.2.4-alpine'
-    deploy:
-      replicas: 3
+  review_app_reader_redis_master:
+    image: 'redis/redis-stack:latest'
+    container_name: review_reader_redis_mt
+    hostname: review_app_reader_redis_master
+    volumes:
+      - ./build/redis.conf:/usr/local/etc/redis/redis.conf
+    command: "redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_CACHE_PASSWORD}"
+    mem_limit: 512m
     environment:
-      - PORT=6378
-    command: "redis-server --save 20 1 --loglevel warning --user ${REDIS_CACHE_USER} --requirepass ${REDIS_CACHE_PASSWORD}"
+      - REDIS_CACHE_USER=${REDIS_CACHE_USER}
+      - REDIS_CACHE_PASSWORD=${REDIS_CACHE_PASSWORD}
+    networks:
+      - review_app_reader
+  review_app_reader_redis_1:
+    image: 'redis/redis-stack:latest'
+    container_name: review_reader_redis_1
+    hostname: review_reader_redis_1
+    volumes:
+      - ./build/redis.conf:/usr/local/etc/redis/redis.conf
+    command: >
+      redis-server /usr/local/etc/redis/redis.conf
+        --replicaof review_app_reader_redis_master 6379
+        --masterauth ${REDIS_CACHE_PASSWORD}
+        --requirepass ${REDIS_CACHE_PASSWORD}
+    mem_limit: 512m
+    depends_on:
+      - review_app_reader_redis_master
+    environment:
+      - REDIS_CACHE_USER=${REDIS_CACHE_USER}
+      - REDIS_CACHE_PASSWORD=${REDIS_CACHE_PASSWORD}
+    networks:
+      - review_app_reader
+  review_app_reader_redis_2:
+    image: 'redis/redis-stack:latest'
+    container_name: review_reader_redis_2
+    hostname: review_reader_redis_2
+    volumes:
+      - ./build/redis.conf:/usr/local/etc/redis/redis.conf
+    command: >
+      redis-server /usr/local/etc/redis/redis.conf
+        --replicaof review_app_reader_redis_master 6379
+        --masterauth ${REDIS_CACHE_PASSWORD}
+        --requirepass ${REDIS_CACHE_PASSWORD}
+    mem_limit: 512m
+    depends_on:
+      - review_app_reader_redis_master
+    environment:
+      - REDIS_CACHE_USER=${REDIS_CACHE_USER}
+      - REDIS_CACHE_PASSWORD=${REDIS_CACHE_PASSWORD}
+    networks:
+      - review_app_reader
+  review_app_reader_redis_3:
+    image: 'redis/redis-stack:latest'
+    container_name: review_reader_redis_3
+    hostname: review_reader_redis_3
+    volumes:
+      - ./build/redis.conf:/usr/local/etc/redis/redis.conf
+    command: >
+      redis-server /usr/local/etc/redis/redis.conf
+        --replicaof review_app_reader_redis_master 6379
+        --masterauth ${REDIS_CACHE_PASSWORD}
+        --requirepass ${REDIS_CACHE_PASSWORD}
+    mem_limit: 512m
+    depends_on:
+      - review_app_reader_redis_master
+    environment:
+      - REDIS_CACHE_USER=${REDIS_CACHE_USER}
+      - REDIS_CACHE_PASSWORD=${REDIS_CACHE_PASSWORD}
+    networks:
+      - review_app_reader
+  review_app_reader_redis_sentinel:
+    image: 'redis:7.2.4-alpine'
+    container_name: review_reader_redis_sn
+    hostname: ${REDIS_CACHE_HOST_READER}
+    command: >
+      sh -c '
+      echo "sentinel monitor my_master review_app_reader_redis_master 6379 1" >> /etc/sentinel.conf;
+      echo "sentinel auth-pass my_master ${REDIS_CACHE_PASSWORD}" >> /etc/sentinel.conf;
+      echo "sentinel resolve-hostnames yes" >> /etc/sentinel.conf;
+      redis-sentinel /etc/sentinel.conf
+      '
+    depends_on:
+      - review_app_reader_redis_master
+      - review_app_reader_redis_1
+      - review_app_reader_redis_2
+      - review_app_reader_redis_3
+    environment:
+      - REDIS_CACHE_USER=${REDIS_CACHE_USER}
+      - REDIS_CACHE_PASSWORD=${REDIS_CACHE_PASSWORD}
     networks:
       - review_app_reader
   review_app_reader_db:
-    image: mongo
+    image: mongo:8
     hostname: review_reader_db
     container_name: review_reader_db
     volumes:
@@ -88,53 +174,31 @@ services:
       - mongodb_config_reader:/data/configdb
     ports:
       - "27017:27017"
-    entrypoint: ["mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db"]
-    environment:
-      MONGO_INITDB_DATABASE: "${MONGO_INIT_DATABASE}"
-      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INIT_ROOT_USERNAME}"
-      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INIT_ROOT_PASSWORD}"
-      MONGO_INITDB_USERNAME: "${MONGO_INIT_USERNAME}"
-      MONGO_INITDB_PASSWORD: "${MONGO_INIT_PASSWORD}"
+    entrypoint: ["mongod", "--replSet", "myReplicaSet", "--bind_ip_all"]
     networks:
       - review_app_reader
   review_app_reader_db_1:
-    image: mongo
+    image: mongo:8
     hostname: review_reader_db_1
     container_name: review_reader_db_1
     volumes:
       - mongodb_data_reader_1:/data/db
       - mongodb_config_reader_1:/data/configdb
-    ports:
-      - "27018:27017"
-    entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db_1" ]
-    environment:
-      MONGO_INITDB_DATABASE: "${MONGO_INIT_DATABASE}"
-      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INIT_ROOT_USERNAME}"
-      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INIT_ROOT_PASSWORD}"
-      MONGO_INITDB_USERNAME: "${MONGO_INIT_USERNAME}"
-      MONGO_INITDB_PASSWORD: "${MONGO_INIT_PASSWORD}"
+    entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip_all"]
     networks:
       - review_app_reader
   review_app_reader_db_2:
-    image: mongo
+    image: mongo:8
     hostname: review_reader_db_2
     container_name: review_reader_db_2
     volumes:
       - mongodb_data_reader_2:/data/db
       - mongodb_config_reader_2:/data/configdb
-    ports:
-      - "27019:27017"
-    entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip", "localhost,review_reader_db_2" ]
-    environment:
-      MONGO_INITDB_DATABASE: "${MONGO_INIT_DATABASE}"
-      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INIT_ROOT_USERNAME}"
-      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INIT_ROOT_PASSWORD}"
-      MONGO_INITDB_USERNAME: "${MONGO_INIT_USERNAME}"
-      MONGO_INITDB_PASSWORD: "${MONGO_INIT_PASSWORD}"
+    entrypoint: [ "mongod", "--replSet", "myReplicaSet", "--bind_ip_all"]
     networks:
       - review_app_reader
   review_app_reader_setup:
-    image: mongo
+    image: mongo:8
     container_name: review_reader_db_setup
     depends_on:
       - review_app_reader_db
@@ -163,13 +227,16 @@ services:
     depends_on:
       - review_app_db
       - review_app_azurite
+      - review_app_reader_db
+      - review_app_reader_db_1
+      - review_app_reader_db_2
     networks:
       - review_app_azfunctions
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - review_app_reader
+      - review_app
   review_app_azurite:
-    container_name: review_app_azurite
-    hostname: review_app_azurite
+    container_name: "${AZURE_DOMAIN}"
+    hostname: "${AZURE_DOMAIN}"
     image: mcr.microsoft.com/azure-storage/azurite
     command: "azurite --loose --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002 --skipApiVersionCheck"
     ports:

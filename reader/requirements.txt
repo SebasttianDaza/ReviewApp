@@ -2,3 +2,5 @@ fastapi[standard]
 mongoengine
 pydantic-settings
 python-dotenv
+pydantic
+redis
